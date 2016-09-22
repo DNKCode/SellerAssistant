@@ -89,7 +89,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
             if (items.get(position).getItemType() != Items4Selection.Item_Type.BACK_MENU)
             {
-                holder.itemDescription.setText(items.get(position).getItemDescription ());
+                String description = items.get(position).getItemDescription();
+                description = description.substring(0, description.length() >= 100 ? 100 : description.length()).concat(description.length() >= 100 ? "..." : "");
+                holder.itemDescription.setText(description);
                 holder.itemPhoto.setImageResource(R.mipmap.nofoto);
 
                 try
@@ -104,7 +106,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                     {
                         Resources res = holder.cv.getContext().getResources();
                         String urlImg = String.format("%s/%s/%s", res.getString(R.string.base_url), res.getString(R.string.image_url), imagePath);
-                        Picasso.with(holder.cv.getContext()).load(urlImg).resize(200, 200).into(holder.itemPhoto);
+                        Picasso.with(holder.cv.getContext()).load(urlImg).resize(100, 100).into(holder.itemPhoto);
                     }
                 }
                 catch (Exception ex)

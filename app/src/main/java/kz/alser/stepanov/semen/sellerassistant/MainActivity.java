@@ -14,9 +14,11 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -27,6 +29,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.Toast;
 import com.google.android.gms.appindexing.Action;
@@ -77,6 +81,10 @@ public class MainActivity
     private SwipeRefreshLayout CartSwipeContainer;
     private CartAdapter cart;
 
+    private Boolean isFabOpen = false;
+    private FloatingActionButton fab,fab1,fab2;
+    private Animation fab_open,fab_close,rotate_forward,rotate_backward;
+
 
     @Override
     protected void onCreate (Bundle savedInstanceState)
@@ -104,8 +112,18 @@ public class MainActivity
                 android.R.color.holo_red_light);
         initCartSwipe();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab1 = (FloatingActionButton)findViewById(R.id.fab1);
+        fab2 = (FloatingActionButton)findViewById(R.id.fab2);
+
+        fab_open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
+        fab_close = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.fab_close);
+        rotate_forward = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_forward);
+        rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_backward);
+
+        fab.setOnClickListener(v -> animateFAB());
+
+        fab2.setOnClickListener(new View.OnClickListener() {
             public void onClick (View v)
             {
                 dialog = new Dialog(MainActivity.this);
@@ -115,22 +133,20 @@ public class MainActivity
                 dialog.setContentView(R.layout.categories_container);
 
                 final Button buttonCancel = (Button) dialog.findViewById(R.id.btn_close_categories_dialog);
-                buttonCancel.setOnClickListener(new View.OnClickListener()
-                {
-                    @Override
-                    public void onClick(View v)
-                    {
+                buttonCancel.setOnClickListener(vv -> {
+                        animateFAB();
                         dialog.dismiss();
-                    }
                 });
 
                 recyclerView = (RecyclerView) dialog.findViewById(R.id.rv);
                 recyclerView.setHasFixedSize(true);
                 //recyclerView.setItemAnimator(new SlideInUpAnimator());
 
-                LinearLayoutManager llm = new LinearLayoutManager(v.getContext());
-                llm.setOrientation(LinearLayoutManager.VERTICAL);
-                recyclerView.setLayoutManager(llm);
+                //LinearLayoutManager llm = new LinearLayoutManager(v.getContext());
+                //llm.setOrientation(LinearLayoutManager.VERTICAL);
+                //recyclerView.setLayoutManager(llm);
+                RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(),2);
+                recyclerView.setLayoutManager(layoutManager);
 
                 List<Items4Selection> items = GetItemsByParentId(0);
                 adapter = new ItemsAdapter(items);
@@ -732,6 +748,7 @@ public class MainActivity
             }
         }
 
+        animateFAB();
         CartSwipeContainer.setRefreshing(false);
     }
 
@@ -753,5 +770,29 @@ public class MainActivity
             }
         });
         CartRecyclerView.setAdapter(cart);
+    }
+
+    public void animateFAB()
+    {
+        if(isFabOpen){
+
+            fab.startAnimation(rotate_backward);
+            fab1.startAnimation(fab_close);
+            fab2.startAnimation(fab_close);
+            fab1.setClickable(false);
+            fab2.setClickable(false);
+            isFabOpen = false;
+            //Log.d("Raj", "close");
+        }
+        else
+        {
+            fab.startAnimation(rotate_forward);
+            fab1.startAnimation(fab_open);
+            fab2.startAnimation(fab_open);
+            fab1.setClickable(true);
+            fab2.setClickable(true);
+            isFabOpen = true;
+            //Log.d("Raj","open");
+        }
     }
 }

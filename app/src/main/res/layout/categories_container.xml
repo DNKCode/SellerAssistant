@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:text="Add to cart" android:padding="16dp"
         android:id="@+id/btn_close_categories_dialog"
-        android:layout_height="50dp"/>
+        android:layout_height="wrap_content"/>
 
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/freshSwipeView"
