@@ -32,5 +32,68 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="bottom"
+        android:layout_alignParentBottom="true" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cart_total_text"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:textAllCaps="true"
+            android:textStyle="normal|bold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/cart_total_no_items"
+            android:id="@+id/cartTotal"
+            android:layout_marginEnd="8dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:textAllCaps="true"
+            android:textStyle="normal|bold"/>
+
+        <Button
+            android:text="@string/cart_erase"
+            android:id="@+id/cartErase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:elevation="4dp"
+            android:layout_marginStart="8dp"
+            android:textStyle="normal|bold"
+            android:focusableInTouchMode="true"
+            android:padding="16dp"
+            android:drawablePadding="8dp"
+            android:drawableRight="@drawable/ic_delete_sweep_black_24dp"
+            android:textAlignment="center"/>
+
+        <Button
+            android:text="@string/cart_process"
+            android:id="@+id/cartBottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:elevation="4dp"
+            android:layout_marginStart="8dp"
+            android:textStyle="normal|bold"
+            android:focusableInTouchMode="true"
+            android:padding="16dp"
+            android:drawablePadding="8dp"
+            android:drawableRight="@drawable/ic_monetization_on_black_24dp"
+            android:textAlignment="center"/>
+
+    </LinearLayout>
 
 </RelativeLayout>

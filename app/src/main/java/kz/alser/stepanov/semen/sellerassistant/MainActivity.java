@@ -32,10 +32,13 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.server.converter.StringToIntConverter;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 import java.util.ArrayList;
@@ -85,6 +88,8 @@ public class MainActivity
     private FloatingActionButton fab,fab1,fab2;
     private Animation fab_open,fab_close,rotate_forward,rotate_backward;
 
+    private TextView cartTotalText;
+
 
     @Override
     protected void onCreate (Bundle savedInstanceState)
@@ -122,7 +127,6 @@ public class MainActivity
         rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_backward);
 
         fab.setOnClickListener(v -> animateFAB());
-
         fab2.setOnClickListener(new View.OnClickListener() {
             public void onClick (View v)
             {
@@ -145,7 +149,9 @@ public class MainActivity
                 //LinearLayoutManager llm = new LinearLayoutManager(v.getContext());
                 //llm.setOrientation(LinearLayoutManager.VERTICAL);
                 //recyclerView.setLayoutManager(llm);
-                RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(),2);
+                int rowCount = GetRowCountForItemsView();
+
+                RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), rowCount);
                 recyclerView.setLayoutManager(layoutManager);
 
                 List<Items4Selection> items = GetItemsByParentId(0);
@@ -169,11 +175,11 @@ public class MainActivity
 
                 swipeContainer = (SwipeRefreshLayout) dialog.findViewById(R.id.freshSwipeView);
 
-                swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+                {
                     @Override
-                    public void onRefresh() {
-                        //Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                        //swipeContainer.setRefreshing(false);
+                    public void onRefresh ()
+                    {
                         ReloadCategoriesFromServer();
                         ReloadProductsFromServer();
                     }
@@ -197,6 +203,8 @@ public class MainActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        cartTotalText = (TextView) findViewById(R.id.cartTotal);
 
         try
         {
@@ -728,7 +736,7 @@ public class MainActivity
             Cart newItem = new Cart();
             newItem.setBeginPrice(item.getItemPrice());
             newItem.setEndPrice(item.getItemPrice());
-            newItem.setQuantity(item.getItemQuantity());
+            newItem.setQuantity(1);
             newItem.setCategoryId(item.getCategoryId());
             newItem.setProductDescription(item.getItemDescription());
             newItem.setProductId(item.getItemId());
@@ -748,6 +756,13 @@ public class MainActivity
             }
         }
 
+        Double cartTotalSum = cart.GetTotalSum();
+        String cartTotalTextIn = getString(R.string.cart_total_no_items);
+
+        if (cartTotalSum > 0)
+            cartTotalTextIn = cartTotalSum.toString();
+
+        cartTotalText.setText(cartTotalTextIn);
         animateFAB();
         CartSwipeContainer.setRefreshing(false);
     }
@@ -794,5 +809,16 @@ public class MainActivity
             isFabOpen = true;
             //Log.d("Raj","open");
         }
+    }
+
+    public int GetRowCountForItemsView()
+    {
+        //int rowCount = 1;
+        int displayWidth = 0;
+
+        Resources res = this.getResources();
+        displayWidth = Math.round(res.getSystem().getDisplayMetrics().widthPixels / 600);
+
+        return displayWidth;
     }
 }

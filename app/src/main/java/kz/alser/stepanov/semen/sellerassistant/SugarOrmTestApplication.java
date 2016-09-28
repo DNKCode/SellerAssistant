@@ -4,6 +4,7 @@ import android.content.res.Configuration;
 import com.orm.SugarApp;
 import com.orm.SugarContext;
 
+import kz.alser.stepanov.semen.sellerassistant.Models.Cart;
 import kz.alser.stepanov.semen.sellerassistant.Models.Category;
 import kz.alser.stepanov.semen.sellerassistant.Models.Product;
 
@@ -23,6 +24,7 @@ public class SugarOrmTestApplication extends SugarApp
         SugarContext.init(getApplicationContext());
         Product.findById(Product.class, (long) 1);
         Category.findById(Category.class, (long) 1);
+        Cart.findById(Cart.class, (long) 1);
     }
 
     @Override

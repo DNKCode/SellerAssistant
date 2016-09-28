@@ -1,9 +1,11 @@
 package kz.alser.stepanov.semen.sellerassistant.Models;
 
+import com.orm.SugarRecord;
+
 /**
  * Created by semen.stepanov on 19.09.2016.
  */
-public class Cart
+public class Cart extends SugarRecord
 {
     private int CategoryId;
 

@@ -1,11 +1,19 @@
 <resources>
     <string name="app_name">SellerAssistant</string>
+    <string name="base_url">http://ustyle.kz</string>
+    <string name="image_url">image</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="action_seller">Seller</string>
+    <string name="action_clients">Clients</string>
+    <string name="action_orders">Orders</string>
 
-    <string name="base_url">http://ustyle.kz</string>
-    <string name="image_url">image</string>
+    <string name="cart_total_text">Total:</string>
+    <string name="cart_total_no_items">no items in cart</string>
+    <string name="cart_process">Process</string>
+    <string name="cart_erase">Erase</string>
+
 </resources>

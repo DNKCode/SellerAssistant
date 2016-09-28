@@ -18,6 +18,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     private final List<Cart> cartItems;
     private static CartAdapter.OnItemClickListener listener;
+    private Double CartSum = 0.0;
 
     public CartAdapter(List<Cart> cart){
         this.cartItems = cart;
@@ -47,8 +48,28 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         notifyItemRangeChanged(position, cartItems.size());
     }
 
-    public void addItem(Cart newItem) {
-        cartItems.add(newItem);
+    public void addItem(Cart newItem)
+    {
+        boolean isItemInCart = false;
+
+        for (int i = 0; i < cartItems.size(); i++)
+        {
+            if (cartItems.get(i).getProductId() == newItem.getProductId())
+            {
+                isItemInCart = true;
+                int quantityInCart = cartItems.get(i).getQuantity();
+                quantityInCart++;
+                cartItems.get(i).setQuantity(quantityInCart);
+
+                break;
+            }
+        }
+
+        if (!isItemInCart)
+        {
+            cartItems.add(newItem);
+        }
+
         notifyDataSetChanged();
     }
 
@@ -106,7 +127,25 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     @Override
     public int getItemCount ()
     {
+        CalculateCart();
         return cartItems.size();
+    }
+
+    private Double CalculateCart()
+    {
+        CartSum = 0.0;
+
+        for (Cart cart : cartItems)
+        {
+            CartSum += cart.getEndPrice() * cart.getQuantity();
+        }
+
+        return CartSum;
+    }
+
+    public Double GetTotalSum()
+    {
+        return CalculateCart();
     }
 
     public static class CartViewHolder
@@ -148,4 +187,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             return false;
         }
     }
+
+
 }
