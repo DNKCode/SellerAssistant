@@ -108,7 +108,7 @@ public class MainActivity
         CartSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                //
+                initCart(GetCartItems());
             }
         });
         CartSwipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
@@ -174,7 +174,6 @@ public class MainActivity
                 recyclerView.setAdapter(adapter);
 
                 swipeContainer = (SwipeRefreshLayout) dialog.findViewById(R.id.freshSwipeView);
-
                 swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
                 {
                     @Override
@@ -204,6 +203,7 @@ public class MainActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        initCart(GetCartItems());
         cartTotalText = (TextView) findViewById(R.id.cartTotal);
 
         try
@@ -820,5 +820,22 @@ public class MainActivity
         displayWidth = Math.round(res.getSystem().getDisplayMetrics().widthPixels / 600);
 
         return displayWidth;
+    }
+
+    private List<Cart> GetCartItems()
+    {
+        List<Cart> items = new ArrayList<Cart>();
+
+        try
+        {
+            items = Cart.listAll(Cart.class);
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+        return items;
     }
 }
