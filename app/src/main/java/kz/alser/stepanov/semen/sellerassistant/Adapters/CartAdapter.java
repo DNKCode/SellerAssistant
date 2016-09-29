@@ -36,10 +36,15 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     @Override
     public CartViewHolder onCreateViewHolder (ViewGroup viewGroup, int viewType)
     {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.dialog_products_list, viewGroup, false);
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.cart_container, viewGroup, false);
         CartViewHolder pvh = new CartViewHolder(v);
 
         return pvh;
+    }
+
+    public Cart GetCartItem(int position)
+    {
+        return cartItems.get(position);
     }
 
     public void removeItem(int position) {
@@ -90,8 +95,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             holder.itemName.setText(cartItems.get(position).getProductName() );
             holder.itemDescription.setText(cartItems.get(position).getProductDescription());
             holder.itemPhoto.setImageResource(R.mipmap.nofoto);
-            holder.itemPrice.setText(String.format("Цена: %.2f", Double.valueOf(String.valueOf(cartItems.get(position).getBeginPrice()))));
-            holder.itemQuantity.setText(String.format("Кол-во на складе: %s", String.valueOf(cartItems.get(position).getQuantity())));
+            holder.itemPriceAll.setText(String.format("Цена: %.2f", Double.valueOf(String.valueOf(cartItems.get(position).getBeginPrice() * cartItems.get(position).getQuantity()))));
+            holder.itemPrice.setText(String.format("Цена за единицу: %.2f", Double.valueOf(String.valueOf(cartItems.get(position).getBeginPrice()))));
+            holder.itemQuantity.setText(String.format("Кол-во в корзине: %s", String.valueOf(cartItems.get(position).getQuantity())));
 
                 try
                 {
@@ -156,6 +162,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         TextView itemDescription;
         ImageView itemPhoto;
         TextView itemPrice;
+        TextView itemPriceAll;
         TextView itemQuantity;
 
         Cart cart;
@@ -166,6 +173,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             itemName = (TextView)itemView.findViewById(R.id.item_name);
             itemDescription = (TextView)itemView.findViewById(R.id.item_description);
             itemPrice = (TextView)itemView.findViewById(R.id.item_price);
+            itemPriceAll = (TextView)itemView.findViewById(R.id.item_priceAll);
             itemQuantity = (TextView)itemView.findViewById(R.id.item_quantity);
             itemPhoto = (ImageView)itemView.findViewById(R.id.item_photo);
             cart = new Cart();

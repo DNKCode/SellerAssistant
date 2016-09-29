@@ -203,8 +203,8 @@ public class MainActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        initCart(GetCartItems());
         cartTotalText = (TextView) findViewById(R.id.cartTotal);
+        initCart(GetCartItems());
 
         try
         {
@@ -243,6 +243,9 @@ public class MainActivity
         {
             ex.printStackTrace();
         }
+
+        Button btnEraseCart = (Button) findViewById(R.id.cartErase);
+        btnEraseCart.setOnClickListener(e -> EraseCart());
 
         //Button btn = (Button) findViewById(R.id.btnTestLambda);
         //btn.setOnClickListener(e -> Toast.makeText(this, "Hello", Toast.LENGTH_LONG).show());
@@ -511,8 +514,11 @@ public class MainActivity
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
-                adapter.removeItem(position);
-                adapter.notifyDataSetChanged();
+
+                Cart c = cart.GetCartItem(position);
+                c.delete();
+
+                cart.reloadCart(GetCartItems());
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
@@ -733,36 +739,35 @@ public class MainActivity
 
         if (item != null)
         {
-            Cart newItem = new Cart();
-            newItem.setBeginPrice(item.getItemPrice());
-            newItem.setEndPrice(item.getItemPrice());
-            newItem.setQuantity(1);
-            newItem.setCategoryId(item.getCategoryId());
-            newItem.setProductDescription(item.getItemDescription());
-            newItem.setProductId(item.getItemId());
-            newItem.setProductImagePath(item.getItemImagePath());
-            newItem.setProductName(item.getItemName());
+            List<Cart> cartItems = Cart.find(Cart.class, "PRODUCT_ID = ?", String.valueOf(item.getItemId()));
 
-            if (cart == null || cart.getItemCount() == 0)
+            if (cartItems == null || cartItems.size() == 0)
             {
-                List<Cart> cart = new ArrayList<Cart>();
-                cart.add(newItem);
-
-                initCart(cart);
+                Cart newItem = new Cart();
+                newItem.setBeginPrice(item.getItemPrice());
+                newItem.setEndPrice(item.getItemPrice());
+                newItem.setQuantity(1);
+                newItem.setCategoryId(item.getCategoryId());
+                newItem.setProductDescription(item.getItemDescription());
+                newItem.setProductId(item.getItemId());
+                newItem.setProductImagePath(item.getItemImagePath());
+                newItem.setProductName(item.getItemName());
+                newItem.save();
             }
             else
             {
-                cart.addItem(newItem);
+                Cart updItem = cartItems.get(0);
+
+                int quantityInCart = updItem.getQuantity();
+                quantityInCart++;
+                updItem.setQuantity(quantityInCart);
+                updItem.save();
             }
+
+            cart.reloadCart(GetCartItems());
+            SetCartSum();
         }
 
-        Double cartTotalSum = cart.GetTotalSum();
-        String cartTotalTextIn = getString(R.string.cart_total_no_items);
-
-        if (cartTotalSum > 0)
-            cartTotalTextIn = cartTotalSum.toString();
-
-        cartTotalText.setText(cartTotalTextIn);
         animateFAB();
         CartSwipeContainer.setRefreshing(false);
     }
@@ -824,18 +829,57 @@ public class MainActivity
 
     private List<Cart> GetCartItems()
     {
+        CartSwipeContainer.setRefreshing(true);
         List<Cart> items = new ArrayList<Cart>();
 
         try
         {
             items = Cart.listAll(Cart.class);
 
+            if (cart ==  null || cart.getItemCount() == 0)
+                initCart(items);
+
+            SetCartSum();
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+
+        CartSwipeContainer.setRefreshing(false);
+        return items;
+    }
+
+    private void EraseCart()
+    {
+        try
+        {
+            CartSwipeContainer.setRefreshing(true);
+
+            Cart.deleteAll(Cart.class);
+            cart.reloadCart(GetCartItems());
+
+            CartSwipeContainer.setRefreshing(false);
         }
         catch (Exception ex)
         {
 
         }
+    }
 
-        return items;
+    private Double CalculateCartSum()
+    {
+        return cart.GetTotalSum();
+    }
+
+    private void SetCartSum()
+    {
+        Double cartTotalSum = CalculateCartSum();
+        String cartTotalTextIn = getString(R.string.cart_total_no_items);
+
+        if (cartTotalSum > 0)
+            cartTotalTextIn = String.format("%.2f", cartTotalSum);
+
+        cartTotalText.setText(cartTotalTextIn);
     }
 }
