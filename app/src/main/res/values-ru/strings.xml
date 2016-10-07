@@ -16,4 +16,9 @@
     <string name="cart_total_no_items">в корзине нет товаров</string>
     <string name="cart_process">Провести</string>
     <string name="cart_erase">Очистить</string>
+
+    <string name="items_back_menu_text">Назад</string>
+
+    <string name="dialog_wait_title">Пожалуйста подождите</string>
+    <string name="dialog_wait_add_to_cart_message">Добавление товара в корзину...</string>
 </resources>

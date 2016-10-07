@@ -16,4 +16,9 @@
     <string name="cart_process">Process</string>
     <string name="cart_erase">Erase</string>
 
+    <string name="items_back_menu_text">Back</string>
+
+    <string name="dialog_wait_title">Please wait</string>
+    <string name="dialog_wait_add_to_cart_message">Adding item to cart...</string>
+
 </resources>

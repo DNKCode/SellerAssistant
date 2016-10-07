@@ -1,6 +1,9 @@
 package kz.alser.stepanov.semen.sellerassistant;
 
+//region Imports area
+
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -14,11 +17,13 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -29,6 +34,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -61,19 +67,23 @@ import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
+//endregion
+
 public class MainActivity
         extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener
 {
-    private Observable<String> myObservable;
-    private Subscriber<String> mySubscriber;
+
+    //region Variables declaring
+    //private Observable<String> myObservable;
+    //private Subscriber<String> mySubscriber;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
 
-    private Dialog dialog;
+    private AlertDialog dialog;
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
@@ -89,7 +99,9 @@ public class MainActivity
     private Animation fab_open,fab_close,rotate_forward,rotate_backward;
 
     private TextView cartTotalText;
+    private ProgressDialog pd;
 
+    //endregion
 
     @Override
     protected void onCreate (Bundle savedInstanceState)
@@ -105,16 +117,14 @@ public class MainActivity
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         CartRecyclerView.setLayoutManager(llm);
         CartSwipeContainer = (SwipeRefreshLayout) findViewById(R.id.refreshCartSwipeView);
-        CartSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                initCart(GetCartItems());
-            }
-        });
-        CartSwipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+        CartSwipeContainer.setOnRefreshListener(() -> initCart(GetCartItems()));
+
+        CartSwipeContainer.setColorSchemeResources(
+                android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+
         initCartSwipe();
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -127,73 +137,7 @@ public class MainActivity
         rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_backward);
 
         fab.setOnClickListener(v -> animateFAB());
-        fab2.setOnClickListener(new View.OnClickListener() {
-            public void onClick (View v)
-            {
-                dialog = new Dialog(MainActivity.this);
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setCancelable(true);
-                dialog.setCanceledOnTouchOutside(true);
-                dialog.setContentView(R.layout.categories_container);
-
-                final Button buttonCancel = (Button) dialog.findViewById(R.id.btn_close_categories_dialog);
-                buttonCancel.setOnClickListener(vv -> {
-                        animateFAB();
-                        dialog.dismiss();
-                });
-
-                recyclerView = (RecyclerView) dialog.findViewById(R.id.rv);
-                recyclerView.setHasFixedSize(true);
-                //recyclerView.setItemAnimator(new SlideInUpAnimator());
-
-                //LinearLayoutManager llm = new LinearLayoutManager(v.getContext());
-                //llm.setOrientation(LinearLayoutManager.VERTICAL);
-                //recyclerView.setLayoutManager(llm);
-                int rowCount = GetRowCountForItemsView();
-
-                RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), rowCount);
-                recyclerView.setLayoutManager(layoutManager);
-
-                List<Items4Selection> items = GetItemsByParentId(0);
-                adapter = new ItemsAdapter(items);
-                adapter.setOnItemClickListener(new ItemsAdapter.OnItemClickListener()
-                {
-                    @Override
-                    public void onItemClick (Items4Selection item)
-                    {
-                        Click2DialogItems(item);
-                    }
-
-                    @Override
-                    public void onItemLongClick (Items4Selection item)
-                    {
-                        Click2DialogItems(item);
-                    }
-                });
-
-                recyclerView.setAdapter(adapter);
-
-                swipeContainer = (SwipeRefreshLayout) dialog.findViewById(R.id.freshSwipeView);
-                swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
-                {
-                    @Override
-                    public void onRefresh ()
-                    {
-                        ReloadCategoriesFromServer();
-                        ReloadProductsFromServer();
-                    }
-                });
-
-                swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
-                        android.R.color.holo_green_light,
-                        android.R.color.holo_orange_light,
-                        android.R.color.holo_red_light);
-
-                initSwipe();
-
-                dialog.show();
-            }
-        });
+        fab2.setOnClickListener(v -> showCategoriesDialog());
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -206,7 +150,7 @@ public class MainActivity
         cartTotalText = (TextView) findViewById(R.id.cartTotal);
         initCart(GetCartItems());
 
-        try
+        /*try
         {
             myObservable = Observable.create(new Observable.OnSubscribe<String>()
             {
@@ -242,7 +186,7 @@ public class MainActivity
         catch (Exception ex)
         {
             ex.printStackTrace();
-        }
+        }*/
 
         Button btnEraseCart = (Button) findViewById(R.id.cartErase);
         btnEraseCart.setOnClickListener(e -> EraseCart());
@@ -254,6 +198,8 @@ public class MainActivity
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
+
+    //region Key press events
 
     @Override
     public void onBackPressed ()
@@ -268,6 +214,10 @@ public class MainActivity
             super.onBackPressed();
         }
     }
+
+    //endregion
+
+    //region Menu method overloads
 
     @Override
     public boolean onCreateOptionsMenu (Menu menu)
@@ -328,45 +278,6 @@ public class MainActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private Observable<List<String>> query (String text)
-    {
-        try
-        {
-            List<String> result = new ArrayList<String>();
-
-            result.add("test");
-            result.add("test2");
-
-            return Observable.just(result);
-            /*return Observable.create(new Observable.OnSubscribe<List<String>>()
-            {
-                @Override
-                public void call (Subscriber<? super List<String>> subscriber)
-                {
-                    try
-                    {
-                        List<String> result = new ArrayList<String>();
-
-                        result.add("test");
-                        result.add("test2");
-
-                        //subscriber.onNext(result);    // Pass on the data to subscriber
-                        //subscriber.onCompleted();     // Signal about the completion subscriber
-                    }
-                    catch (Exception e)
-                    {
-                        //subscriber.onError(e);        // Signal about the error to subscriber
-                    }
-                }
-            });*/
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
     @SuppressWarnings ("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected (MenuItem item)
@@ -403,6 +314,10 @@ public class MainActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    //endregion
+
+    //region Google Services overloads
 
     @Override
     public void onStart ()
@@ -441,6 +356,10 @@ public class MainActivity
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
     }
+
+    //endregion
+
+    //region Init swipes
 
     private void initSwipe(){
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -525,6 +444,10 @@ public class MainActivity
         itemTouchHelper.attachToRecyclerView(CartRecyclerView);
     }
 
+    //endregion
+
+    //region Get data from db
+
     private List<Items4Selection> GetItemsByParentId(int itemId)
     {
         List<Items4Selection> items = new ArrayList<Items4Selection>();
@@ -584,7 +507,7 @@ public class MainActivity
                         "",
                         Integer.valueOf(itemParentId),
                         "",
-                        "НАЗАД",
+                        getString(R.string.items_back_menu_text),
                         0,
                         0,
                         "9999",
@@ -602,12 +525,15 @@ public class MainActivity
         return items;
     }
 
+    //endregion
+
+    //region Reload Data from service
+
     public void ReloadCategoriesFromServer()
     {
         try
         {
             swipeContainer.setRefreshing(true);
-            Category.deleteAll(Category.class);
 
             Retrofit retrofit = new Retrofit.Builder()
                     .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
@@ -620,6 +546,7 @@ public class MainActivity
 
             responseObservable.subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .retry(3)
                     .subscribe(r -> {
 
                         if (r.getRspCode() != 0)
@@ -628,6 +555,7 @@ public class MainActivity
                             return;
                         }
 
+                        Category.deleteAll(Category.class);
                         List<Category> categories = r.getCategories();
 
                         for (Category category : categories)
@@ -638,13 +566,14 @@ public class MainActivity
                         List<Items4Selection> items = GetItemsByParentId(0);
                         adapter.reloadCategories(items);
 
-                        swipeContainer.setRefreshing(false);
+                        //swipeContainer.setRefreshing(false);
 
                     }, throwable -> {
                         swipeContainer.setRefreshing(false);
                         Toast.makeText(MainActivity.this, String.format("Возникла ошибка при обновлении категорий: %s", throwable.getMessage()), Toast.LENGTH_SHORT).show();
                         throwable.printStackTrace();
-                    });
+                    },
+                    () -> swipeContainer.setRefreshing(false));
         }
         catch (Exception ex)
         {
@@ -659,7 +588,6 @@ public class MainActivity
         try
         {
             swipeContainer.setRefreshing(true);
-            Product.deleteAll(Product.class);
 
             Retrofit retrofit = new Retrofit.Builder()
                     .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
@@ -672,6 +600,7 @@ public class MainActivity
 
             productsResponse.subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .retry(3)
                     .subscribe(r -> {
 
                         if (r.getRspCode() != 0)
@@ -680,6 +609,7 @@ public class MainActivity
                             return;
                         }
 
+                        Product.deleteAll(Product.class);
                         List<Product> products = r.getProducts();
                         for (Product product : products)
                         {
@@ -689,13 +619,14 @@ public class MainActivity
                         List<Items4Selection> items = GetItemsByParentId(0);
                         adapter.reloadCategories(items);
 
-                        swipeContainer.setRefreshing(false);
+                        //swipeContainer.setRefreshing(false);
 
                     }, throwable -> {
                         swipeContainer.setRefreshing(false);
                         Toast.makeText(MainActivity.this, String.format("Возникла ошибка при обновлении продуктов: %s", throwable.getMessage()), Toast.LENGTH_SHORT).show();
                         throwable.printStackTrace();
-                    });
+                    },
+                    () -> swipeContainer.setRefreshing(false));
         }
         catch (Exception ex)
         {
@@ -705,16 +636,22 @@ public class MainActivity
         }
     }
 
+    //endregion
+
     public void Click2DialogItems(Items4Selection item)
     {
-        swipeContainer.setRefreshing(true);
-
         if (item != null)
         {
             if (item.getItemType() == Items4Selection.Item_Type.PRODUCT)
             {
-                AddItem2Cart(item);
-                swipeContainer.setRefreshing(false);
+                AddItem2Cart(item).subscribe(
+                        isOK -> {},
+                        throwable -> Toast.makeText(MainActivity.this, String.format("Возникла ошибка при добавлении товара в корзину: %s", throwable.getMessage()), Toast.LENGTH_SHORT).show(),
+                        () -> {
+                            cart.reloadCart(GetCartItems());
+                            SetCartSum();
+                        }
+                );
 
                 if (dialog != null)
                     dialog.dismiss();
@@ -729,48 +666,59 @@ public class MainActivity
                 adapter.reloadCategories(items);
             }
         }
-
-        swipeContainer.setRefreshing(false);
     }
 
-    public void AddItem2Cart(Items4Selection item)
+    //region Add to cart with RxJava
+
+    private Observable<Items4Selection> AddItem2Cart(Items4Selection item)
     {
-        CartSwipeContainer.setRefreshing(true);
+        return Observable.just(item)
+                .doOnNext(i -> {
+                    pd = new ProgressDialog(MainActivity.this);
+                    pd.setMessage(getString(R.string.dialog_wait_add_to_cart_message));
+                    pd.setIndeterminate(true);
+                    pd.setTitle(getString(R.string.dialog_wait_title));
+                    pd.setCancelable(false);
+                    pd.setCanceledOnTouchOutside(false);
+                    pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    pd.show();
+                })
+                .doOnNext(i -> {
+                    if (i != null)
+                    {
+                        List<Cart> cartItems = Cart.find(Cart.class, "PRODUCT_ID = ?", String.valueOf(i.getItemId()));
 
-        if (item != null)
-        {
-            List<Cart> cartItems = Cart.find(Cart.class, "PRODUCT_ID = ?", String.valueOf(item.getItemId()));
+                        if (cartItems == null || cartItems.size() == 0)
+                        {
+                            Cart newItem = new Cart();
+                            newItem.setBeginPrice(i.getItemPrice());
+                            newItem.setEndPrice(i.getItemPrice());
+                            newItem.setQuantity(1);
+                            newItem.setCategoryId(i.getCategoryId());
+                            newItem.setProductDescription(i.getItemDescription());
+                            newItem.setProductId(i.getItemId());
+                            newItem.setProductImagePath(i.getItemImagePath());
+                            newItem.setProductName(i.getItemName());
+                            newItem.save();
+                        }
+                        else
+                        {
+                            Cart updItem = cartItems.get(0);
 
-            if (cartItems == null || cartItems.size() == 0)
-            {
-                Cart newItem = new Cart();
-                newItem.setBeginPrice(item.getItemPrice());
-                newItem.setEndPrice(item.getItemPrice());
-                newItem.setQuantity(1);
-                newItem.setCategoryId(item.getCategoryId());
-                newItem.setProductDescription(item.getItemDescription());
-                newItem.setProductId(item.getItemId());
-                newItem.setProductImagePath(item.getItemImagePath());
-                newItem.setProductName(item.getItemName());
-                newItem.save();
-            }
-            else
-            {
-                Cart updItem = cartItems.get(0);
-
-                int quantityInCart = updItem.getQuantity();
-                quantityInCart++;
-                updItem.setQuantity(quantityInCart);
-                updItem.save();
-            }
-
-            cart.reloadCart(GetCartItems());
-            SetCartSum();
-        }
-
-        animateFAB();
-        CartSwipeContainer.setRefreshing(false);
+                            int quantityInCart = updItem.getQuantity();
+                            quantityInCart++;
+                            updItem.setQuantity(quantityInCart);
+                            updItem.save();
+                        }
+                    }
+                })
+                .doOnNext(i -> {
+                    animateFAB();
+                    if (pd != null) pd.dismiss();
+                });
     }
+
+    //endregion
 
     public void initCart(List<Cart> cartItems)
     {
@@ -792,33 +740,8 @@ public class MainActivity
         CartRecyclerView.setAdapter(cart);
     }
 
-    public void animateFAB()
-    {
-        if(isFabOpen){
-
-            fab.startAnimation(rotate_backward);
-            fab1.startAnimation(fab_close);
-            fab2.startAnimation(fab_close);
-            fab1.setClickable(false);
-            fab2.setClickable(false);
-            isFabOpen = false;
-            //Log.d("Raj", "close");
-        }
-        else
-        {
-            fab.startAnimation(rotate_forward);
-            fab1.startAnimation(fab_open);
-            fab2.startAnimation(fab_open);
-            fab1.setClickable(true);
-            fab2.setClickable(true);
-            isFabOpen = true;
-            //Log.d("Raj","open");
-        }
-    }
-
     public int GetRowCountForItemsView()
     {
-        //int rowCount = 1;
         int displayWidth = 0;
 
         Resources res = this.getResources();
@@ -848,6 +771,101 @@ public class MainActivity
 
         CartSwipeContainer.setRefreshing(false);
         return items;
+    }
+
+    private void showCategoriesDialog()
+    {
+        AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
+        LayoutInflater inflater = getLayoutInflater();
+        final View categoriesLayout = inflater.inflate(R.layout.categories_container, null);
+        adb.setView(categoriesLayout);
+
+        dialog = adb.create();
+
+        //dialog = new Dialog(MainActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+        //dialog.setContentView(R.layout.categories_container);
+
+        final Button buttonCancel = (Button) categoriesLayout.findViewById(R.id.btn_close_categories_dialog);
+        buttonCancel.setOnClickListener(vv -> {
+            animateFAB();
+            dialog.dismiss();
+        });
+
+        recyclerView = (RecyclerView) categoriesLayout.findViewById(R.id.rv);
+        recyclerView.setHasFixedSize(true);
+        //recyclerView.setItemAnimator(new SlideInUpAnimator());
+
+        //LinearLayoutManager llm = new LinearLayoutManager(v.getContext());
+        //llm.setOrientation(LinearLayoutManager.VERTICAL);
+        //recyclerView.setLayoutManager(llm);
+        int rowCount = GetRowCountForItemsView();
+
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), rowCount);
+        recyclerView.setLayoutManager(layoutManager);
+
+        List<Items4Selection> items = GetItemsByParentId(0);
+        adapter = new ItemsAdapter(items);
+        adapter.setOnItemClickListener(new ItemsAdapter.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick (Items4Selection item)
+            {
+                Click2DialogItems(item);
+            }
+
+            @Override
+            public void onItemLongClick (Items4Selection item)
+            {
+                Click2DialogItems(item);
+            }
+        });
+
+        recyclerView.setAdapter(adapter);
+
+        swipeContainer = (SwipeRefreshLayout) categoriesLayout.findViewById(R.id.freshSwipeView);
+        swipeContainer.setOnRefreshListener(() ->
+        {
+            ReloadCategoriesFromServer();
+            ReloadProductsFromServer();
+        });
+
+        swipeContainer.setColorSchemeResources(
+                android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+        initSwipe();
+
+        dialog.show();
+        dialog.getWindow().setLayout(getResources().getSystem().getDisplayMetrics().widthPixels - 50, getResources().getSystem().getDisplayMetrics().heightPixels - 50);
+    }
+
+    //region Other methods
+
+    private void animateFAB()
+    {
+        if(isFabOpen){
+
+            fab.startAnimation(rotate_backward);
+            fab1.startAnimation(fab_close);
+            fab2.startAnimation(fab_close);
+            fab1.setClickable(false);
+            fab2.setClickable(false);
+            isFabOpen = false;
+        }
+        else
+        {
+            fab.startAnimation(rotate_forward);
+            fab1.startAnimation(fab_open);
+            fab2.startAnimation(fab_open);
+            fab1.setClickable(true);
+            fab2.setClickable(true);
+            isFabOpen = true;
+        }
     }
 
     private void EraseCart()
@@ -882,4 +900,49 @@ public class MainActivity
 
         cartTotalText.setText(cartTotalTextIn);
     }
+
+    //endregion
+
+    //region Testing methods
+
+    private Observable<List<String>> query (String text)
+    {
+        try
+        {
+            List<String> result = new ArrayList<String>();
+
+            result.add("test");
+            result.add("test2");
+
+            return Observable.just(result);
+            /*return Observable.create(new Observable.OnSubscribe<List<String>>()
+            {
+                @Override
+                public void call (Subscriber<? super List<String>> subscriber)
+                {
+                    try
+                    {
+                        List<String> result = new ArrayList<String>();
+
+                        result.add("test");
+                        result.add("test2");
+
+                        //subscriber.onNext(result);    // Pass on the data to subscriber
+                        //subscriber.onCompleted();     // Signal about the completion subscriber
+                    }
+                    catch (Exception e)
+                    {
+                        //subscriber.onError(e);        // Signal about the error to subscriber
+                    }
+                }
+            });*/
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    //endregion
 }
