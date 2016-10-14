@@ -93,7 +93,11 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             holder.cart = cartItems.get(position);
 
             holder.itemName.setText(cartItems.get(position).getProductName() );
-            holder.itemDescription.setText(cartItems.get(position).getProductDescription());
+
+            String description = cartItems.get(position).getProductDescription();
+            description = description.substring(0, description.length() >= 100 ? 100 : description.length()).concat(description.length() >= 100 ? "..." : "");
+            holder.itemDescription.setText(description);
+
             holder.itemPhoto.setImageResource(R.mipmap.nofoto);
             holder.itemPriceAll.setText(String.format("Цена: %.2f", Double.valueOf(String.valueOf(cartItems.get(position).getBeginPrice() * cartItems.get(position).getQuantity()))));
             holder.itemPrice.setText(String.format("Цена за единицу: %.2f", Double.valueOf(String.valueOf(cartItems.get(position).getBeginPrice()))));

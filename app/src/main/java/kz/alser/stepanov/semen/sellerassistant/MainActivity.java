@@ -2,7 +2,6 @@ package kz.alser.stepanov.semen.sellerassistant;
 
 //region Imports area
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -14,15 +13,14 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -34,17 +32,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.server.converter.StringToIntConverter;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 import java.util.ArrayList;
@@ -63,7 +58,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
-import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -95,7 +90,7 @@ public class MainActivity
     private CartAdapter cart;
 
     private Boolean isFabOpen = false;
-    private FloatingActionButton fab,fab1,fab2;
+    private FloatingActionButton fab, fab1, fab2, fabClearBasket;
     private Animation fab_open,fab_close,rotate_forward,rotate_backward;
 
     private TextView cartTotalText;
@@ -130,6 +125,7 @@ public class MainActivity
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab1 = (FloatingActionButton)findViewById(R.id.fab1);
         fab2 = (FloatingActionButton)findViewById(R.id.fab2);
+        fabClearBasket = (FloatingActionButton)findViewById(R.id.fabClearBasket);
 
         fab_open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
         fab_close = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.fab_close);
@@ -137,7 +133,36 @@ public class MainActivity
         rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_backward);
 
         fab.setOnClickListener(v -> animateFAB());
-        fab2.setOnClickListener(v -> showCategoriesDialog());
+        fab2.setOnClickListener(v -> {
+            showLoadingView(getString(R.string.dialog_wait_load_items_from_db));
+            List<Items4Selection> items = new ArrayList<>();
+            GetItemsByParentIdWithObservable(0)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            isOk -> items.add(isOk),
+                            throwable -> hideLoadingViewWithError(throwable.getMessage()),
+                            () -> {
+                                showCategoriesDialog(items);
+                                hideLoadingView();
+                            }
+                    );
+        });
+        fabClearBasket.setOnClickListener(e -> {
+            showLoadingView(getString(R.string.dialog_wait_clearing_basket));
+            EraseCart()
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            isOk -> { },
+                            throwable -> hideLoadingViewWithError(throwable.getMessage()),
+                            () -> {
+                                hideLoadingView();
+                                animateFAB();
+                                cart.reloadCart(GetCartItems());
+                            }
+                    );
+        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -149,50 +174,6 @@ public class MainActivity
 
         cartTotalText = (TextView) findViewById(R.id.cartTotal);
         initCart(GetCartItems());
-
-        /*try
-        {
-            myObservable = Observable.create(new Observable.OnSubscribe<String>()
-            {
-                @Override
-                public void call (Subscriber<? super String> sub)
-                {
-                    sub.onNext("Hello, world!");
-                    sub.onCompleted();
-                }
-            });
-
-            mySubscriber = new Subscriber<String>()
-            {
-                @Override
-                public void onNext (String s)
-                {
-                    System.out.println(s);
-                    Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onCompleted ()
-                {
-                }
-
-                @Override
-                public void onError (Throwable e)
-                {
-
-                }
-            };
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }*/
-
-        Button btnEraseCart = (Button) findViewById(R.id.cartErase);
-        btnEraseCart.setOnClickListener(e -> EraseCart());
-
-        //Button btn = (Button) findViewById(R.id.btnTestLambda);
-        //btn.setOnClickListener(e -> Toast.makeText(this, "Hello", Toast.LENGTH_LONG).show());
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -450,7 +431,121 @@ public class MainActivity
 
     private List<Items4Selection> GetItemsByParentId(int itemId)
     {
-        List<Items4Selection> items = new ArrayList<Items4Selection>();
+        List<Items4Selection> items = new ArrayList<>();
+
+        final Subscription subscription = Observable
+                .concat(GetCategoriesByIdWithObservable(itemId), GetProductsByIdWithObservable(itemId), GetBackMenuWithObservable(itemId))
+                //GetCategoriesByIdWithObservable(itemId)
+                        //.subscribeOn(Schedulers.io())
+                        //.observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                isOk -> items.add(isOk),
+                                throwable -> Toast.makeText(MainActivity.this, String.format("Возникла ошибка при загрузке товаров и категорий из БД: %s", throwable.getMessage()), Toast.LENGTH_SHORT).show(),
+                                () -> {
+                                    //if (pd != null) pd.dismiss();
+                                }
+                        );
+
+        subscription.unsubscribe();
+
+        return items;
+    }
+
+    @NonNull
+    private Observable<Items4Selection> GetCategoriesByIdWithObservable(int itemId)
+    {
+        return Observable.create(subscriber -> {
+            List<Category> categories = Category.find(Category.class, "CATEGORY_PARENT_ID = ?", String.valueOf(itemId));
+
+            for (Category category : categories)
+            {
+                Items4Selection item = new Items4Selection(
+                        Integer.valueOf(category.getCategoryId()),
+                        Integer.valueOf(category.getCategoryParentId()),
+                        category.getCategoryDescription(),
+                        Integer.valueOf(category.getCategoryId()),
+                        category.getCategoryImagePath(),
+                        category.getCategoryName(),
+                        0,
+                        0,
+                        category.getCategorySortOrder(),
+                        Items4Selection.Item_Type.CATEGORY
+                );
+
+                subscriber.onNext(item);
+            }
+
+                subscriber.onCompleted();
+            });
+    }
+
+    @NonNull
+    private Observable<Items4Selection> GetProductsByIdWithObservable(int itemId)
+    {
+        return Observable.create(subscriber -> {
+            List<Product> products = Product.find(Product.class, "CATEGORY_ID = ?", String.valueOf(itemId));
+
+            for (Product product : products)
+            {
+                Items4Selection item = new Items4Selection(
+                        Integer.valueOf(product.getCategoryId()),
+                        0,
+                        product.getProductDescription (),
+                        Integer.valueOf(product.getProductId()),
+                        product.getProductImagePath (),
+                        product.getProductName(),
+                        Double.valueOf(product.getProductPrice()),
+                        Integer.valueOf(product.getProductQuantity()),
+                        product.getProductSortOrder(),
+                        Items4Selection.Item_Type.PRODUCT
+                );
+
+                subscriber.onNext(item);
+            }
+
+            subscriber.onCompleted();
+        });
+    }
+
+    @NonNull
+    private Observable<Items4Selection> GetBackMenuWithObservable(int itemId)
+    {
+        return Observable.create(subscriber -> {
+
+            if (itemId != 0)
+            {
+                String itemParentId = Select
+                        .from(Category.class)
+                        .where(Condition.prop("CATEGORY_ID").eq(String.valueOf(itemId)))
+                        .first()
+                        .getCategoryParentId();
+
+                Items4Selection item = new Items4Selection(
+                        Integer.valueOf(itemParentId),
+                        Integer.valueOf(itemParentId),
+                        "",
+                        Integer.valueOf(itemParentId),
+                        "",
+                        getString(R.string.items_back_menu_text),
+                        0,
+                        0,
+                        "9999",
+                        Items4Selection.Item_Type.BACK_MENU
+                );
+
+                subscriber.onNext(item);
+            }
+
+            subscriber.onCompleted();
+        });
+    }
+
+    @NonNull
+    private Observable<Items4Selection> GetItemsByParentIdWithObservable(int itemId)
+    {
+        return Observable.concat(GetCategoriesByIdWithObservable(itemId), GetProductsByIdWithObservable(itemId), GetBackMenuWithObservable(itemId));
+
+        /*List<Items4Selection> items = new ArrayList<Items4Selection>();
 
         try
         {
@@ -522,7 +617,7 @@ public class MainActivity
 
         }
 
-        return items;
+        return items;*/
     }
 
     //endregion
@@ -638,7 +733,7 @@ public class MainActivity
 
     //endregion
 
-    public void Click2DialogItems(Items4Selection item)
+    private void Click2DialogItems(Items4Selection item)
     {
         if (item != null)
         {
@@ -653,8 +748,7 @@ public class MainActivity
                         }
                 );
 
-                if (dialog != null)
-                    dialog.dismiss();
+                hideCategoriesDialog();
 
                 return;
             }
@@ -670,19 +764,11 @@ public class MainActivity
 
     //region Add to cart with RxJava
 
+    @NonNull
     private Observable<Items4Selection> AddItem2Cart(Items4Selection item)
     {
         return Observable.just(item)
-                .doOnNext(i -> {
-                    pd = new ProgressDialog(MainActivity.this);
-                    pd.setMessage(getString(R.string.dialog_wait_add_to_cart_message));
-                    pd.setIndeterminate(true);
-                    pd.setTitle(getString(R.string.dialog_wait_title));
-                    pd.setCancelable(false);
-                    pd.setCanceledOnTouchOutside(false);
-                    pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    pd.show();
-                })
+                .doOnNext(i -> showLoadingView(getString(R.string.dialog_wait_add_to_cart_message)))
                 .doOnNext(i -> {
                     if (i != null)
                     {
@@ -714,41 +800,11 @@ public class MainActivity
                 })
                 .doOnNext(i -> {
                     animateFAB();
-                    if (pd != null) pd.dismiss();
+                    hideLoadingView();
                 });
     }
 
     //endregion
-
-    public void initCart(List<Cart> cartItems)
-    {
-        cart = new CartAdapter(cartItems);
-        cart.setOnItemClickListener(new CartAdapter.OnItemClickListener()
-        {
-            @Override
-            public void onItemClick (Cart cartItem)
-            {
-
-            }
-
-            @Override
-            public void onItemLongClick (Cart cartItem)
-            {
-
-            }
-        });
-        CartRecyclerView.setAdapter(cart);
-    }
-
-    public int GetRowCountForItemsView()
-    {
-        int displayWidth = 0;
-
-        Resources res = this.getResources();
-        displayWidth = Math.round(res.getSystem().getDisplayMetrics().widthPixels / 600);
-
-        return displayWidth;
-    }
 
     private List<Cart> GetCartItems()
     {
@@ -773,8 +829,23 @@ public class MainActivity
         return items;
     }
 
-    private void showCategoriesDialog()
+    //region Show and Hide dialogs
+
+    private void hideCategoriesDialog()
     {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+    }
+
+    private void showCategoriesDialog(List<Items4Selection> items)
+    {
+        if (items.size() == 0)
+        {
+            Toast.makeText(MainActivity.this, "Нет доступных товаров и категорий по запрашиваемым параметрам", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
         LayoutInflater inflater = getLayoutInflater();
         final View categoriesLayout = inflater.inflate(R.layout.categories_container, null);
@@ -806,8 +877,9 @@ public class MainActivity
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), rowCount);
         recyclerView.setLayoutManager(layoutManager);
 
-        List<Items4Selection> items = GetItemsByParentId(0);
         adapter = new ItemsAdapter(items);
+        //adapter.reloadCategories(items);
+
         adapter.setOnItemClickListener(new ItemsAdapter.OnItemClickListener()
         {
             @Override
@@ -844,7 +916,66 @@ public class MainActivity
         dialog.getWindow().setLayout(getResources().getSystem().getDisplayMetrics().widthPixels - 50, getResources().getSystem().getDisplayMetrics().heightPixels - 50);
     }
 
+    //endregion
+
     //region Other methods
+
+    protected void showLoadingView(String messageText) {
+        //pd = ProgressDialog.show(this, "", getString(R.string.dialog_wait_add_to_cart_message), true, false);
+        pd = new ProgressDialog(MainActivity.this);
+        pd.setMessage(messageText);
+        pd.setIndeterminate(true);
+        pd.setTitle(getString(R.string.dialog_wait_title));
+        pd.setCancelable(false);
+        pd.setCanceledOnTouchOutside(false);
+        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pd.show();
+    }
+
+    protected void hideLoadingView() {
+        if (pd != null && pd.isShowing()) {
+            pd.dismiss();
+        }
+    }
+
+    protected void hideLoadingViewWithError(String errorMessage) {
+        if (!errorMessage.isEmpty())
+            Toast.makeText(MainActivity.this, String.format("Возникла ошибка при загрузки товаров и категорий: %s", errorMessage), Toast.LENGTH_SHORT).show();
+
+        if (pd != null && pd.isShowing()) {
+            pd.dismiss();
+        }
+    }
+
+    private void initCart(List<Cart> cartItems)
+    {
+        cart = new CartAdapter(cartItems);
+        cart.setOnItemClickListener(new CartAdapter.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick (Cart cartItem)
+            {
+
+            }
+
+            @Override
+            public void onItemLongClick (Cart cartItem)
+            {
+
+            }
+        });
+        CartRecyclerView.setAdapter(cart);
+    }
+
+    private int GetRowCountForItemsView()
+    {
+        int displayWidth = 0;
+
+        Resources res = this.getResources();
+        displayWidth = Math.round(res.getSystem().getDisplayMetrics().widthPixels / 600);
+
+        return displayWidth;
+    }
 
     private void animateFAB()
     {
@@ -853,8 +984,12 @@ public class MainActivity
             fab.startAnimation(rotate_backward);
             fab1.startAnimation(fab_close);
             fab2.startAnimation(fab_close);
+            fabClearBasket.startAnimation(fab_close);
+
             fab1.setClickable(false);
             fab2.setClickable(false);
+            fabClearBasket.setClickable(false);
+
             isFabOpen = false;
         }
         else
@@ -862,27 +997,29 @@ public class MainActivity
             fab.startAnimation(rotate_forward);
             fab1.startAnimation(fab_open);
             fab2.startAnimation(fab_open);
+            fabClearBasket.startAnimation(fab_open);
+
             fab1.setClickable(true);
             fab2.setClickable(true);
+            fabClearBasket.setClickable(true);
+
             isFabOpen = true;
         }
     }
 
-    private void EraseCart()
+    @NonNull
+    private Observable<Integer> EraseCart()
     {
-        try
-        {
-            CartSwipeContainer.setRefreshing(true);
+        return Observable.create(subscriber -> {
+            TruncateCartTable();
+            subscriber.onNext(0);
+            subscriber.onCompleted();
+        });
+    }
 
-            Cart.deleteAll(Cart.class);
-            cart.reloadCart(GetCartItems());
-
-            CartSwipeContainer.setRefreshing(false);
-        }
-        catch (Exception ex)
-        {
-
-        }
+    private void TruncateCartTable()
+    {
+        Cart.deleteAll(Cart.class);
     }
 
     private Double CalculateCartSum()

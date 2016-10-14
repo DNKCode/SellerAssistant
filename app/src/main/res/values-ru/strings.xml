@@ -13,7 +13,6 @@
     <string name="action_orders">Заказы</string>
 
     <string name="cart_total_text">Итого:</string>
-    <string name="cart_total_no_items">в корзине нет товаров</string>
     <string name="cart_process">Провести</string>
     <string name="cart_erase">Очистить</string>
 
@@ -21,4 +20,6 @@
 
     <string name="dialog_wait_title">Пожалуйста подождите</string>
     <string name="dialog_wait_add_to_cart_message">Добавление товара в корзину...</string>
+    <string name="dialog_wait_load_items_from_db">Загрузка товаров и категорий из БД...</string>
+    <string name="dialog_wait_clearing_basket">Очистка корзины...</string>
 </resources>

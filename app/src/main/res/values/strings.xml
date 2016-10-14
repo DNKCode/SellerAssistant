@@ -12,13 +12,15 @@
     <string name="action_orders">Orders</string>
 
     <string name="cart_total_text">Total:</string>
-    <string name="cart_total_no_items">no items in cart</string>
+    <string name="cart_total_no_items">0,00</string>
     <string name="cart_process">Process</string>
-    <string name="cart_erase">Erase</string>
+    <string name="cart_erase">Clear</string>
 
     <string name="items_back_menu_text">Back</string>
 
     <string name="dialog_wait_title">Please wait</string>
     <string name="dialog_wait_add_to_cart_message">Adding item to cart...</string>
+    <string name="dialog_wait_load_items_from_db">Loading products and categories from database...</string>
+    <string name="dialog_wait_clearing_basket">Clearing the basket...</string>
 
 </resources>
