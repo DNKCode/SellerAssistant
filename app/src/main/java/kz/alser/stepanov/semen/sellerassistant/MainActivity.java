@@ -44,6 +44,7 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import kz.alser.stepanov.semen.sellerassistant.API.CategoriesAPI;
 import kz.alser.stepanov.semen.sellerassistant.API.ProductsAPI;
@@ -90,8 +91,8 @@ public class MainActivity
     private CartAdapter cart;
 
     private Boolean isFabOpen = false;
-    private FloatingActionButton fab, fab1, fab2, fabClearBasket;
-    private Animation fab_open,fab_close,rotate_forward,rotate_backward;
+    private FloatingActionButton fab, fabAddClient, fabAdd2Basket, fabClearBasket;
+    private Animation fab_open, fab_close, rotate_forward, rotate_backward;
 
     private TextView cartTotalText;
     private ProgressDialog pd;
@@ -123,8 +124,8 @@ public class MainActivity
         initCartSwipe();
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab1 = (FloatingActionButton)findViewById(R.id.fab1);
-        fab2 = (FloatingActionButton)findViewById(R.id.fab2);
+        fabAddClient = (FloatingActionButton)findViewById(R.id.fabAddClient);
+        fabAdd2Basket = (FloatingActionButton)findViewById(R.id.fabAdd2Basket);
         fabClearBasket = (FloatingActionButton)findViewById(R.id.fabClearBasket);
 
         fab_open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
@@ -133,7 +134,8 @@ public class MainActivity
         rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_backward);
 
         fab.setOnClickListener(v -> animateFAB());
-        fab2.setOnClickListener(v -> {
+
+        fabAdd2Basket.setOnClickListener(v -> {
             showLoadingView(getString(R.string.dialog_wait_load_items_from_db));
             List<Items4Selection> items = new ArrayList<>();
             GetItemsByParentIdWithObservable(0)
@@ -148,6 +150,7 @@ public class MainActivity
                             }
                     );
         });
+
         fabClearBasket.setOnClickListener(e -> {
             showLoadingView(getString(R.string.dialog_wait_clearing_basket));
             EraseCart()
@@ -160,6 +163,7 @@ public class MainActivity
                                 hideLoadingView();
                                 animateFAB();
                                 cart.reloadCart(GetCartItems());
+                                SetCartSum();
                             }
                     );
         });
@@ -415,10 +419,32 @@ public class MainActivity
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
 
-                Cart c = cart.GetCartItem(position);
-                c.delete();
+                DeleteElementFromCart(position)
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                isOk -> { },
+                                throwable -> hideLoadingViewWithError(throwable.getMessage()),
+                                () -> {
+                                    List<Cart> cartItem = new ArrayList<>();
+                                    GetCartItemsWithObservable()
+                                            .subscribeOn(Schedulers.newThread())
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribe(
+                                                    isOK -> cartItem.add(isOK),
+                                                    throwable -> hideLoadingViewWithError(throwable.getMessage()),
+                                                    () -> {
+                                                        hideLoadingView();
+                                                        cart.reloadCart(cartItem);
+                                                        SetCartSum();
+                                                    }
+                                            );
+                                }
+                        );
 
-                cart.reloadCart(GetCartItems());
+                //Cart c = cart.GetCartItem(position);
+                //c.delete();
+                //cart.reloadCart(GetCartItems());
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
@@ -433,20 +459,23 @@ public class MainActivity
     {
         List<Items4Selection> items = new ArrayList<>();
 
-        final Subscription subscription = Observable
-                .concat(GetCategoriesByIdWithObservable(itemId), GetProductsByIdWithObservable(itemId), GetBackMenuWithObservable(itemId))
-                //GetCategoriesByIdWithObservable(itemId)
-                        //.subscribeOn(Schedulers.io())
-                        //.observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                isOk -> items.add(isOk),
-                                throwable -> Toast.makeText(MainActivity.this, String.format("Возникла ошибка при загрузке товаров и категорий из БД: %s", throwable.getMessage()), Toast.LENGTH_SHORT).show(),
-                                () -> {
-                                    //if (pd != null) pd.dismiss();
-                                }
-                        );
+        try
+        {
+            final Subscription subscription = Observable.concat(GetCategoriesByIdWithObservable(itemId), GetProductsByIdWithObservable(itemId), GetBackMenuWithObservable(itemId))
+                    //GetCategoriesByIdWithObservable(itemId)
+                    //.subscribeOn(Schedulers.io())
+                    //.observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            isOk -> items.add(isOk),
+                            throwable -> Toast.makeText(MainActivity.this, String.format("Возникла ошибка при загрузке товаров и категорий из БД: %s", throwable.getMessage()), Toast.LENGTH_SHORT).show(),
+                            () -> { });
 
-        subscription.unsubscribe();
+            subscription.unsubscribe();
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
 
         return items;
     }
@@ -455,52 +484,43 @@ public class MainActivity
     private Observable<Items4Selection> GetCategoriesByIdWithObservable(int itemId)
     {
         return Observable.create(subscriber -> {
-            List<Category> categories = Category.find(Category.class, "CATEGORY_PARENT_ID = ?", String.valueOf(itemId));
-
-            for (Category category : categories)
+            try
             {
-                Items4Selection item = new Items4Selection(
-                        Integer.valueOf(category.getCategoryId()),
-                        Integer.valueOf(category.getCategoryParentId()),
-                        category.getCategoryDescription(),
-                        Integer.valueOf(category.getCategoryId()),
-                        category.getCategoryImagePath(),
-                        category.getCategoryName(),
-                        0,
-                        0,
-                        category.getCategorySortOrder(),
-                        Items4Selection.Item_Type.CATEGORY
-                );
+                List<Category> categories = Category.find(Category.class, "CATEGORY_PARENT_ID = ?", String.valueOf(itemId));
 
-                subscriber.onNext(item);
+                for (Category category : categories)
+                {
+                    Items4Selection item = new Items4Selection(Integer.valueOf(category.getCategoryId()), Integer.valueOf(category.getCategoryParentId()), category.getCategoryDescription(), Integer.valueOf(category.getCategoryId()), category.getCategoryImagePath(), category.getCategoryName(), 0, 0, category.getCategorySortOrder(), Items4Selection.Item_Type.CATEGORY);
+                    subscriber.onNext(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
             }
 
-                subscriber.onCompleted();
-            });
+            subscriber.onCompleted();
+
+        });
     }
 
     @NonNull
     private Observable<Items4Selection> GetProductsByIdWithObservable(int itemId)
     {
         return Observable.create(subscriber -> {
-            List<Product> products = Product.find(Product.class, "CATEGORY_ID = ?", String.valueOf(itemId));
-
-            for (Product product : products)
+            try
             {
-                Items4Selection item = new Items4Selection(
-                        Integer.valueOf(product.getCategoryId()),
-                        0,
-                        product.getProductDescription (),
-                        Integer.valueOf(product.getProductId()),
-                        product.getProductImagePath (),
-                        product.getProductName(),
-                        Double.valueOf(product.getProductPrice()),
-                        Integer.valueOf(product.getProductQuantity()),
-                        product.getProductSortOrder(),
-                        Items4Selection.Item_Type.PRODUCT
-                );
+                List<Product> products = Product.find(Product.class, "CATEGORY_ID = ?", String.valueOf(itemId));
 
-                subscriber.onNext(item);
+                for (Product product : products)
+                {
+                    Items4Selection item = new Items4Selection(Integer.valueOf(product.getCategoryId()), 0, product.getProductDescription(), Integer.valueOf(product.getProductId()), product.getProductImagePath(), product.getProductName(), Double.valueOf(product.getProductPrice()), Integer.valueOf(product.getProductQuantity()), product.getProductSortOrder(), Items4Selection.Item_Type.PRODUCT);
+                    subscriber.onNext(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
             }
 
             subscriber.onCompleted();
@@ -512,28 +532,18 @@ public class MainActivity
     {
         return Observable.create(subscriber -> {
 
-            if (itemId != 0)
+            try
             {
-                String itemParentId = Select
-                        .from(Category.class)
-                        .where(Condition.prop("CATEGORY_ID").eq(String.valueOf(itemId)))
-                        .first()
-                        .getCategoryParentId();
-
-                Items4Selection item = new Items4Selection(
-                        Integer.valueOf(itemParentId),
-                        Integer.valueOf(itemParentId),
-                        "",
-                        Integer.valueOf(itemParentId),
-                        "",
-                        getString(R.string.items_back_menu_text),
-                        0,
-                        0,
-                        "9999",
-                        Items4Selection.Item_Type.BACK_MENU
-                );
-
-                subscriber.onNext(item);
+                if (itemId != 0)
+                {
+                    String itemParentId = Select.from(Category.class).where(Condition.prop("CATEGORY_ID").eq(String.valueOf(itemId))).first().getCategoryParentId();
+                    Items4Selection item = new Items4Selection(Integer.valueOf(itemParentId), Integer.valueOf(itemParentId), "", Integer.valueOf(itemParentId), "", getString(R.string.items_back_menu_text), 0, 0, "9999", Items4Selection.Item_Type.BACK_MENU);
+                    subscriber.onNext(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
             }
 
             subscriber.onCompleted();
@@ -543,7 +553,15 @@ public class MainActivity
     @NonNull
     private Observable<Items4Selection> GetItemsByParentIdWithObservable(int itemId)
     {
-        return Observable.concat(GetCategoriesByIdWithObservable(itemId), GetProductsByIdWithObservable(itemId), GetBackMenuWithObservable(itemId));
+        try
+        {
+            return Observable.concat(GetCategoriesByIdWithObservable(itemId), GetProductsByIdWithObservable(itemId), GetBackMenuWithObservable(itemId));
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
 
         /*List<Items4Selection> items = new ArrayList<Items4Selection>();
 
@@ -753,12 +771,36 @@ public class MainActivity
                 return;
             }
 
+            showLoadingView(getString(R.string.dialog_wait_load_items_from_db));
+            List<Items4Selection> items = new ArrayList<>();
+
+            GetItemsByParentIdWithObservable(item.getCategoryId())
+                    .onBackpressureDrop()
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnError(i -> {
+                        i.printStackTrace();
+                    })
+                    .subscribe(
+                            isOk -> items.add(isOk),
+                            throwable -> hideLoadingViewWithError(throwable.getMessage()),
+                            () -> {
+                                hideLoadingView();
+
+                                if (items.size() > 0)
+                                {
+                                    adapter.reloadCategories(items);
+                                }
+                            }
+                    );
+
+            /*
             List<Items4Selection> items = GetItemsByParentId(item.getCategoryId());
 
             if (items.size() > 0)
             {
                 adapter.reloadCategories(items);
-            }
+            }*/
         }
     }
 
@@ -806,10 +848,48 @@ public class MainActivity
 
     //endregion
 
+    @NonNull
+    private Observable<Cart> GetCartItemsWithObservable()
+    {
+        return Observable.create(subscriber -> {
+            List<Cart> items = Cart.listAll(Cart.class);
+
+            for (Cart cart : items)
+            {
+                subscriber.onNext(cart);
+            }
+
+            subscriber.onCompleted();
+        });
+    }
+
+    @NonNull
     private List<Cart> GetCartItems()
     {
         CartSwipeContainer.setRefreshing(true);
-        List<Cart> items = new ArrayList<Cart>();
+        List<Cart> items = new ArrayList<>();
+        final Subscription subscription = GetCartItemsWithObservable()
+                //.subscribeOn(Schedulers.newThread())
+                //.observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        isOk -> items.add(isOk),
+                        throwable -> hideLoadingViewWithError(throwable.getMessage()),
+                        () -> {
+                            if (cart ==  null || cart.getItemCount() == 0)
+                                initCart(items);
+
+                            SetCartSum();
+                            CartSwipeContainer.setRefreshing(false);
+                        }
+                );
+
+        subscription.unsubscribe();
+
+        return items;
+
+        /*
+        CartSwipeContainer.setRefreshing(true);
+        List<Cart> items = new ArrayList<>();
 
         try
         {
@@ -826,7 +906,7 @@ public class MainActivity
         }
 
         CartSwipeContainer.setRefreshing(false);
-        return items;
+        return items;*/
     }
 
     //region Show and Hide dialogs
@@ -936,6 +1016,10 @@ public class MainActivity
         if (pd != null && pd.isShowing()) {
             pd.dismiss();
         }
+
+        if (CartSwipeContainer != null && CartSwipeContainer.isRefreshing()) {
+            CartSwipeContainer.setRefreshing(false);
+        }
     }
 
     protected void hideLoadingViewWithError(String errorMessage) {
@@ -944,6 +1028,10 @@ public class MainActivity
 
         if (pd != null && pd.isShowing()) {
             pd.dismiss();
+        }
+
+        if (CartSwipeContainer != null && CartSwipeContainer.isRefreshing()) {
+            CartSwipeContainer.setRefreshing(false);
         }
     }
 
@@ -982,12 +1070,12 @@ public class MainActivity
         if(isFabOpen){
 
             fab.startAnimation(rotate_backward);
-            fab1.startAnimation(fab_close);
-            fab2.startAnimation(fab_close);
+            fabAddClient.startAnimation(fab_close);
+            fabAdd2Basket.startAnimation(fab_close);
             fabClearBasket.startAnimation(fab_close);
 
-            fab1.setClickable(false);
-            fab2.setClickable(false);
+            fabAddClient.setClickable(false);
+            fabAdd2Basket.setClickable(false);
             fabClearBasket.setClickable(false);
 
             isFabOpen = false;
@@ -995,12 +1083,12 @@ public class MainActivity
         else
         {
             fab.startAnimation(rotate_forward);
-            fab1.startAnimation(fab_open);
-            fab2.startAnimation(fab_open);
+            fabAddClient.startAnimation(fab_open);
+            fabAdd2Basket.startAnimation(fab_open);
             fabClearBasket.startAnimation(fab_open);
 
-            fab1.setClickable(true);
-            fab2.setClickable(true);
+            fabAddClient.setClickable(true);
+            fabAdd2Basket.setClickable(true);
             fabClearBasket.setClickable(true);
 
             isFabOpen = true;
@@ -1013,6 +1101,16 @@ public class MainActivity
         return Observable.create(subscriber -> {
             TruncateCartTable();
             subscriber.onNext(0);
+            subscriber.onCompleted();
+        });
+    }
+
+    @NonNull
+    private Observable<Boolean> DeleteElementFromCart(int position)
+    {
+        return Observable.create(subscriber -> {
+            Cart c = cart.GetCartItem(position);
+            subscriber.onNext(c.delete());
             subscriber.onCompleted();
         });
     }

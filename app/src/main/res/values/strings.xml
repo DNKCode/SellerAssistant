@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SellerAssistant</string>
+    <string name="app_name">Seller Assistant</string>
     <string name="base_url">http://ustyle.kz</string>
     <string name="image_url">image</string>
 
