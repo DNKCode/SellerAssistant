@@ -44,11 +44,11 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import kz.alser.stepanov.semen.sellerassistant.API.CategoriesAPI;
 import kz.alser.stepanov.semen.sellerassistant.API.ProductsAPI;
 import kz.alser.stepanov.semen.sellerassistant.Adapters.CartAdapter;
+import kz.alser.stepanov.semen.sellerassistant.Adapters.ItemsAdapter;
 import kz.alser.stepanov.semen.sellerassistant.Models.Cart;
 import kz.alser.stepanov.semen.sellerassistant.Models.Category;
 import kz.alser.stepanov.semen.sellerassistant.Models.CategoryResponse;
@@ -284,7 +284,9 @@ public class MainActivity
         }
         else if (id == R.id.nav_manage)
         {
-
+            Intent settings = new Intent();
+            settings.setClass(this, SettingsFragment.class);
+            startActivity(settings);
         }
         else if (id == R.id.nav_share)
         {
@@ -418,7 +420,7 @@ public class MainActivity
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
-
+                showLoadingView(getString(R.string.dialog_wait_delete_element_from_basket));
                 DeleteElementFromCart(position)
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -1102,6 +1104,7 @@ public class MainActivity
             TruncateCartTable();
             subscriber.onNext(0);
             subscriber.onCompleted();
+            subscriber.unsubscribe();
         });
     }
 
@@ -1112,6 +1115,7 @@ public class MainActivity
             Cart c = cart.GetCartItem(position);
             subscriber.onNext(c.delete());
             subscriber.onCompleted();
+            subscriber.unsubscribe();
         });
     }
 

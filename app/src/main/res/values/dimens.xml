@@ -8,4 +8,5 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="text_size_for_cart_footer">20sp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 </resources>

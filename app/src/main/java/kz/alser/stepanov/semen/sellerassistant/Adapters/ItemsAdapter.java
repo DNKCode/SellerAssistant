@@ -1,4 +1,4 @@
-package kz.alser.stepanov.semen.sellerassistant;
+package kz.alser.stepanov.semen.sellerassistant.Adapters;
 
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -14,6 +14,7 @@ import java.util.List;
 
 import kz.alser.stepanov.semen.sellerassistant.Helpers.Helpers;
 import kz.alser.stepanov.semen.sellerassistant.Models.Items4Selection;
+import kz.alser.stepanov.semen.sellerassistant.R;
 
 /**
  * Created by semen.stepanov on 09.09.2016.

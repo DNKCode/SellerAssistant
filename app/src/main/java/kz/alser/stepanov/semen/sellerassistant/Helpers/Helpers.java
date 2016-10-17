@@ -1,5 +1,7 @@
 package kz.alser.stepanov.semen.sellerassistant.Helpers;
 
+import android.support.annotation.NonNull;
+
 import org.jsoup.Jsoup;
 
 import static android.text.Html.fromHtml;
@@ -24,6 +26,7 @@ public class Helpers
                 .replace("&amp;", "&");
     }
 
+    @NonNull
     private static String ClearHTMLTags(String inputStr)
     {
         return fromHtml(inputStr).toString().replaceAll("\n", "").trim();

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Seller Assistant</string>
+    <string name="app_name">Ассистент продавца</string>
     <string name="base_url">http://ustyle.kz</string>
     <string name="image_url">image</string>
 
@@ -22,4 +22,5 @@
     <string name="dialog_wait_add_to_cart_message">Добавление товара в корзину...</string>
     <string name="dialog_wait_load_items_from_db">Загрузка товаров и категорий из БД...</string>
     <string name="dialog_wait_clearing_basket">Очистка корзины...</string>
+    <string name="dialog_wait_delete_element_from_basket">Удаляем товар из корзины...</string>
 </resources>
