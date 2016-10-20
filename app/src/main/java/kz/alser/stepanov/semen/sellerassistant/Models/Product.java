@@ -53,6 +53,9 @@ public class Product extends SugarRecord
     @SerializedName("categoryId")
     @Expose
     private String categoryId;
+    @SerializedName("languageId")
+    @Expose
+    private String languageId;
 
     public Product()
     {
@@ -334,5 +337,13 @@ public class Product extends SugarRecord
         this.categoryId = categoryId;
     }
 
+    public String getLanguageId ()
+    {
+        return languageId;
+    }
 
+    public void setLanguageId (String languageId)
+    {
+        this.languageId = languageId;
+    }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class CategoryResponse {
+public class LanguagesResponse {
 
     @SerializedName("rspCode")
     @Expose
@@ -13,9 +13,9 @@ public class CategoryResponse {
     @SerializedName("rspMessage")
     @Expose
     private String rspMessage;
-    @SerializedName("categories")
+    @SerializedName("languages")
     @Expose
-    private List<Category> categories = new ArrayList<Category>();
+    private List<Language> languages = new ArrayList<Language>();
 
     /**
      *
@@ -56,19 +56,19 @@ public class CategoryResponse {
     /**
      *
      * @return
-     * The categories
+     * The languages
      */
-    public List<Category> getCategories() {
-        return categories;
+    public List<Language> getLanguages() {
+        return languages;
     }
 
     /**
      *
-     * @param categories
-     * The categories
+     * @param languages
+     * The languages
      */
-    public void setCategories(List<Category> categories) {
-        this.categories = categories;
+    public void setLanguages(List<Language> languages) {
+        this.languages = languages;
     }
 
 }

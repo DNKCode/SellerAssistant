@@ -25,6 +25,9 @@ public class Category extends SugarRecord
     @SerializedName("categorySortOrder")
     @Expose
     private String categorySortOrder;
+    @SerializedName("categoryLanguageId")
+    @Expose
+    private String categoryLanguageId;
 
     public Category()
     {
@@ -137,5 +140,15 @@ public class Category extends SugarRecord
      */
     public void setCategorySortOrder(String categorySortOrder) {
         this.categorySortOrder = categorySortOrder;
+    }
+
+    public String getCategoryLanguageId ()
+    {
+        return categoryLanguageId;
+    }
+
+    public void setCategoryLanguageId (String categoryLanguageId)
+    {
+        this.categoryLanguageId = categoryLanguageId;
     }
 }

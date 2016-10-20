@@ -1,4 +1,4 @@
-package kz.alser.stepanov.semen.sellerassistant;
+package kz.alser.stepanov.semen.sellerassistant.Activities;
 
 //region Imports area
 
@@ -55,6 +55,7 @@ import kz.alser.stepanov.semen.sellerassistant.Models.CategoryResponse;
 import kz.alser.stepanov.semen.sellerassistant.Models.Items4Selection;
 import kz.alser.stepanov.semen.sellerassistant.Models.Product;
 import kz.alser.stepanov.semen.sellerassistant.Models.ProductResponse;
+import kz.alser.stepanov.semen.sellerassistant.R;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -97,6 +98,7 @@ public class MainActivity
     private TextView cartTotalText;
     private ProgressDialog pd;
 
+    protected DrawerLayout mDrawer;
     //endregion
 
     @Override
@@ -168,9 +170,10 @@ public class MainActivity
                     );
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawer.setDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -285,7 +288,7 @@ public class MainActivity
         else if (id == R.id.nav_manage)
         {
             Intent settings = new Intent();
-            settings.setClass(this, SettingsFragment.class);
+            settings.setClass(this, SettingsActivity.class);
             startActivity(settings);
         }
         else if (id == R.id.nav_share)
@@ -488,7 +491,7 @@ public class MainActivity
         return Observable.create(subscriber -> {
             try
             {
-                List<Category> categories = Category.find(Category.class, "CATEGORY_PARENT_ID = ?", String.valueOf(itemId));
+                List<Category> categories = Category.find(Category.class, "CATEGORY_PARENT_ID = ? and CATEGORY_LANGUAGE_ID = ?", String.valueOf(itemId), "1");
 
                 for (Category category : categories)
                 {
@@ -512,7 +515,7 @@ public class MainActivity
         return Observable.create(subscriber -> {
             try
             {
-                List<Product> products = Product.find(Product.class, "CATEGORY_ID = ?", String.valueOf(itemId));
+                List<Product> products = Product.find(Product.class, "CATEGORY_ID = ? AND LANGUAGE_ID = ?", String.valueOf(itemId), "1");
 
                 for (Product product : products)
                 {

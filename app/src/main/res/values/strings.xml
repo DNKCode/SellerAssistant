@@ -10,6 +10,7 @@
     <string name="action_seller">Seller</string>
     <string name="action_clients">Clients</string>
     <string name="action_orders">Orders</string>
+    <string name="action_dictionaries">Dictionaries</string>
 
     <string name="cart_total_text">Total:</string>
     <string name="cart_total_no_items">0,00</string>
@@ -24,7 +25,16 @@
     <string name="dialog_wait_clearing_basket">Clearing the basket...</string>
     <string name="dialog_wait_delete_element_from_basket">Delete item from basket...</string>
 
+    <string name="settings_seller_phone">Phone number</string>
+    <string name="settings_seller_name">Seller name</string>
+    <string name="settings_seller_email">Email</string>
+    <string name="settings_seller_sex">Sex</string>
+
+    <string name="prompt_email">Email (optional)</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="isSendNewsToEmail">I want to receive news on my email</string>
+    <string name="savePrivateSettings">Save settings</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-
 </resources>

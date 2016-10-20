@@ -1,9 +1,7 @@
-package kz.alser.stepanov.semen.sellerassistant;
+package kz.alser.stepanov.semen.sellerassistant.Activities;
 
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -13,17 +11,16 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.sql.DataTruncation;
 import java.util.ArrayList;
 import java.util.List;
 
 import kz.alser.stepanov.semen.sellerassistant.API.CategoriesAPI;
 import kz.alser.stepanov.semen.sellerassistant.API.ProductsAPI;
-import kz.alser.stepanov.semen.sellerassistant.Models.Categories;
 import kz.alser.stepanov.semen.sellerassistant.Models.Category;
 import kz.alser.stepanov.semen.sellerassistant.Models.CategoryResponse;
 import kz.alser.stepanov.semen.sellerassistant.Models.Product;
 import kz.alser.stepanov.semen.sellerassistant.Models.ProductResponse;
+import kz.alser.stepanov.semen.sellerassistant.R;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

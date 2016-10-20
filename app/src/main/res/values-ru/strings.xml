@@ -11,6 +11,7 @@
     <string name="action_seller">Продавец</string>
     <string name="action_clients">Клиенты</string>
     <string name="action_orders">Заказы</string>
+    <string name="action_dictionaries">Справочники</string>
 
     <string name="cart_total_text">Итого:</string>
     <string name="cart_process">Провести</string>
@@ -23,4 +24,13 @@
     <string name="dialog_wait_load_items_from_db">Загрузка товаров и категорий из БД...</string>
     <string name="dialog_wait_clearing_basket">Очистка корзины...</string>
     <string name="dialog_wait_delete_element_from_basket">Удаляем товар из корзины...</string>
+
+    <string name="settings_seller_phone">Номер телефона</string>
+    <string name="settings_seller_name">Имя продавца</string>
+    <string name="settings_seller_email">Email</string>
+    <string name="settings_seller_sex">Пол</string>
+
+    <string name="prompt_email">Email (необязательно)</string>
+    <string name="isSendNewsToEmail">Я хочу получать новости на мой email</string>
+    <string name="savePrivateSettings">Сохранить настройки</string>
 </resources>
