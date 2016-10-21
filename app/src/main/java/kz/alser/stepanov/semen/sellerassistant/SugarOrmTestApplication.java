@@ -7,6 +7,9 @@ import com.orm.SugarContext;
 import kz.alser.stepanov.semen.sellerassistant.Models.Cart;
 import kz.alser.stepanov.semen.sellerassistant.Models.Category;
 import kz.alser.stepanov.semen.sellerassistant.Models.Language;
+import kz.alser.stepanov.semen.sellerassistant.Models.Orders;
+import kz.alser.stepanov.semen.sellerassistant.Models.OrdersProduct;
+import kz.alser.stepanov.semen.sellerassistant.Models.OrdersStatus;
 import kz.alser.stepanov.semen.sellerassistant.Models.Product;
 
 /**
@@ -27,6 +30,9 @@ public class SugarOrmTestApplication extends SugarApp
         Category.findById(Category.class, (long) 1);
         Cart.findById(Cart.class, (long) 1);
         Language.findById(Language.class, (long) 1);
+        Orders.findById(Orders.class, (long) 1);
+        OrdersProduct.findById(OrdersProduct.class, (long) 1);
+        OrdersStatus.findById(OrdersStatus.class, (long) 1);
     }
 
     @Override

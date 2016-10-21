@@ -14,18 +14,25 @@ import java.util.List;
 
 import kz.alser.stepanov.semen.sellerassistant.Models.Category;
 import kz.alser.stepanov.semen.sellerassistant.Models.Language;
+import kz.alser.stepanov.semen.sellerassistant.Models.Orders;
+import kz.alser.stepanov.semen.sellerassistant.Models.OrdersProduct;
+import kz.alser.stepanov.semen.sellerassistant.Models.OrdersStatus;
 import kz.alser.stepanov.semen.sellerassistant.Models.Product;
 import kz.alser.stepanov.semen.sellerassistant.R;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import static kz.alser.stepanov.semen.sellerassistant.Services.GetDataFromServer.ReloadLanguagesFromServer;
 import static kz.alser.stepanov.semen.sellerassistant.Services.GetDataFromServer.ReloadProductsFromServer;
 import static kz.alser.stepanov.semen.sellerassistant.Services.GetDataFromServer.ReloadCategoriesFromServer;
+import static kz.alser.stepanov.semen.sellerassistant.Services.GetDataFromServer.ReloadOrdersFromServer;
+import static kz.alser.stepanov.semen.sellerassistant.Services.GetDataFromServer.ReloadOrderProductsFromServer;
+import static kz.alser.stepanov.semen.sellerassistant.Services.GetDataFromServer.ReloadOrderStatusesFromServer;
 
 public class SettingsDictionaryFragment extends Fragment
 {
     private OnFragmentInteractionListener mListener;
-    private Button btnReloadLanguages, btnReloadProducts, btnReloadCategories;
+    private Button btnReloadLanguages, btnReloadProducts, btnReloadCategories, btnReloadOrders;
     private ProgressDialog pd;
 
     public SettingsDictionaryFragment ()
@@ -52,6 +59,9 @@ public class SettingsDictionaryFragment extends Fragment
 
         btnReloadCategories = (Button) view.findViewById(R.id.btnUpdateCategories);
         btnReloadCategories.setOnClickListener(click -> ReloadCategories());
+
+        btnReloadOrders = (Button) view.findViewById(R.id.btnUpdateOrders);
+        btnReloadOrders.setOnClickListener(click -> ReloadOrdersAll());
 
         return view;
     }
@@ -192,6 +202,157 @@ public class SettingsDictionaryFragment extends Fragment
                                 category.save();
                             }
                         }, throwable -> {
+                            hideLoadingViewWithError(throwable.getMessage());
+                            throwable.printStackTrace();
+                        },
+                        () -> hideLoadingView());
+    }
+
+    protected void ReloadOrders()
+    {
+        showLoadingView("Обновление заказов");
+        ReloadOrdersFromServer(this.getContext())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retry(3)
+                .subscribe(r -> {
+                            if (r.getRspCode() != 0)
+                            {
+                                hideLoadingViewWithError(r.getRspMessage());
+                                return;
+                            }
+
+                            Orders.deleteAll(Orders.class);
+                            List<Orders> orders = r.getOrders();
+                            for (Orders order : orders)
+                            {
+                                order.save();
+                            }
+                        }, throwable -> {
+                            hideLoadingViewWithError(throwable.getMessage());
+                            throwable.printStackTrace();
+                        },
+                        () -> hideLoadingView());
+    }
+
+    protected void ReloadOrderProducts()
+    {
+        showLoadingView("Обновление товаров в заказах");
+        ReloadOrderProductsFromServer(this.getContext())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retry(3)
+                .subscribe(r -> {
+                            if (r.getRspCode() != 0)
+                            {
+                                hideLoadingViewWithError(r.getRspMessage());
+                                return;
+                            }
+
+                            OrdersProduct.deleteAll(OrdersProduct.class);
+                            List<OrdersProduct> ordersProducts = r.getOrdersProducts();
+                            for (OrdersProduct ordersProduct : ordersProducts)
+                            {
+                                ordersProduct.save();
+                            }
+                        }, throwable -> {
+                            hideLoadingViewWithError(throwable.getMessage());
+                            throwable.printStackTrace();
+                        },
+                        () -> hideLoadingView());
+    }
+
+    protected void ReloadOrderStatuses()
+    {
+        showLoadingView("Обновление товаров в заказах");
+        ReloadOrderStatusesFromServer(this.getContext())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retry(3)
+                .subscribe(r -> {
+                            if (r.getRspCode() != 0)
+                            {
+                                hideLoadingViewWithError(r.getRspMessage());
+                                return;
+                            }
+
+                            OrdersStatus.deleteAll(OrdersStatus.class);
+                            List<OrdersStatus> ordersStatuses = r.getOrdersStatuses();
+                            for (OrdersStatus ordersStatus : ordersStatuses)
+                            {
+                                ordersStatus.save();
+                            }
+                        }, throwable -> {
+                            hideLoadingViewWithError(throwable.getMessage());
+                            throwable.printStackTrace();
+                        },
+                        () -> hideLoadingView());
+    }
+
+    protected void ReloadOrdersAll()
+    {
+        showLoadingView("Обновление заказов");
+
+        Observable.create(subscriber -> {
+
+            ReloadOrdersFromServer(this.getContext())
+                    .subscribe(r -> {
+                                if (r.getRspCode() != 0)
+                                {
+                                    hideLoadingViewWithError(r.getRspMessage());
+                                    return;
+                                }
+
+                                Orders.deleteAll(Orders.class);
+                                List<Orders> orders = r.getOrders();
+                                for (Orders order : orders)
+                                {
+                                    order.save();
+                                }
+                            }, throwable -> throwable.printStackTrace());
+
+            ReloadOrderProductsFromServer(this.getContext())
+                    .subscribe(r -> {
+                                if (r.getRspCode() != 0)
+                                {
+                                    hideLoadingViewWithError(r.getRspMessage());
+                                    return;
+                                }
+
+                                OrdersProduct.deleteAll(OrdersProduct.class);
+                                List<OrdersProduct> ordersProducts = r.getOrdersProducts();
+                                for (OrdersProduct ordersProduct : ordersProducts)
+                                {
+                                    ordersProduct.save();
+                                }
+                            }, throwable -> throwable.printStackTrace());
+
+            ReloadOrderStatusesFromServer(this.getContext())
+                    .subscribe(r -> {
+                                if (r.getRspCode() != 0)
+                                {
+                                    hideLoadingViewWithError(r.getRspMessage());
+                                    return;
+                                }
+
+                                OrdersStatus.deleteAll(OrdersStatus.class);
+                                List<OrdersStatus> ordersStatuses = r.getOrdersStatuses();
+                                for (OrdersStatus ordersStatus : ordersStatuses)
+                                {
+                                    ordersStatus.save();
+                                }
+                            }, throwable -> throwable.printStackTrace());
+
+            subscriber.onNext(0);
+            subscriber.onCompleted();
+            subscriber.unsubscribe();
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retry(3)
+                .subscribe(
+                        isOK -> { },
+                        throwable -> {
                             hideLoadingViewWithError(throwable.getMessage());
                             throwable.printStackTrace();
                         },

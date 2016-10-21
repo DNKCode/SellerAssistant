@@ -4,9 +4,13 @@ import android.content.Context;
 
 import kz.alser.stepanov.semen.sellerassistant.API.CategoriesAPI;
 import kz.alser.stepanov.semen.sellerassistant.API.LanguagesAPI;
+import kz.alser.stepanov.semen.sellerassistant.API.OrdersAPI;
 import kz.alser.stepanov.semen.sellerassistant.API.ProductsAPI;
 import kz.alser.stepanov.semen.sellerassistant.Models.CategoryResponse;
 import kz.alser.stepanov.semen.sellerassistant.Models.LanguagesResponse;
+import kz.alser.stepanov.semen.sellerassistant.Models.OrdersProductsResponse;
+import kz.alser.stepanov.semen.sellerassistant.Models.OrdersResponse;
+import kz.alser.stepanov.semen.sellerassistant.Models.OrdersStatusesResponse;
 import kz.alser.stepanov.semen.sellerassistant.Models.ProductResponse;
 import kz.alser.stepanov.semen.sellerassistant.R;
 import retrofit2.Retrofit;
@@ -51,7 +55,43 @@ public class GetDataFromServer
                 .baseUrl(context.getString(R.string.base_url))
                 .build();
 
-         CategoriesAPI categoriesAPI = retrofit.create(CategoriesAPI.class);
+        CategoriesAPI categoriesAPI = retrofit.create(CategoriesAPI.class);
         return categoriesAPI.loadCategoriesNew();
+    }
+
+    public static Observable<OrdersResponse> ReloadOrdersFromServer(Context context)
+    {
+        Retrofit retrofit = new Retrofit.Builder()
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(context.getString(R.string.base_url))
+                .build();
+
+        OrdersAPI ordersAPI = retrofit.create(OrdersAPI.class);
+        return ordersAPI.loadOrders();
+    }
+
+    public static Observable<OrdersStatusesResponse> ReloadOrderStatusesFromServer(Context context)
+    {
+        Retrofit retrofit = new Retrofit.Builder()
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(context.getString(R.string.base_url))
+                .build();
+
+        OrdersAPI ordersAPI = retrofit.create(OrdersAPI.class);
+        return ordersAPI.loadOrdersStatuses();
+    }
+
+    public static Observable<OrdersProductsResponse> ReloadOrderProductsFromServer(Context context)
+    {
+        Retrofit retrofit = new Retrofit.Builder()
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(context.getString(R.string.base_url))
+                .build();
+
+        OrdersAPI ordersAPI = retrofit.create(OrdersAPI.class);
+        return ordersAPI.loadOrdersProducts();
     }
 }
