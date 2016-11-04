@@ -2,6 +2,8 @@
     <string name="app_name">Seller Assistant</string>
     <string name="base_url">http://ustyle.kz</string>
     <string name="image_url">image</string>
+    <string name="default_language_id_pref">DEFAULT_LANGUAGE</string>
+    <string name="default_language_id">1</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -24,17 +26,23 @@
     <string name="dialog_wait_load_items_from_db">Loading products and categories from database...</string>
     <string name="dialog_wait_clearing_basket">Clearing the basket...</string>
     <string name="dialog_wait_delete_element_from_basket">Delete item from basket...</string>
+    <string name="dialog_wait_reload_orders_from_server">Reload orders...</string>
 
     <string name="settings_seller_phone">Phone number</string>
     <string name="settings_seller_name">Seller name</string>
     <string name="settings_seller_email">Email</string>
     <string name="settings_seller_sex">Sex</string>
+    <string name="settings_language">Language</string>
 
     <string name="prompt_email">Email (optional)</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="isSendNewsToEmail">I want to receive news on my email</string>
     <string name="savePrivateSettings">Save settings</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="orders_order_number">Order: %s</string>
+    <string name="orders_order_client_info">Client: %1$s %2$s</string>
+    <string name="orders_total_sum">Total sum: %.2f</string>
+
+    <string name="error_message_load_categories_and_products">Error loading products and categoriers: %s</string>
+    <string name="error_message_update_categories">Error on update categories: %s</string>
 </resources>

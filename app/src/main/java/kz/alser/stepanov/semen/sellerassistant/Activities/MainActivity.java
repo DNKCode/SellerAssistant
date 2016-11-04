@@ -53,6 +53,7 @@ import kz.alser.stepanov.semen.sellerassistant.Models.Cart;
 import kz.alser.stepanov.semen.sellerassistant.Models.Category;
 import kz.alser.stepanov.semen.sellerassistant.Models.CategoryResponse;
 import kz.alser.stepanov.semen.sellerassistant.Models.Items4Selection;
+import kz.alser.stepanov.semen.sellerassistant.Models.Orders;
 import kz.alser.stepanov.semen.sellerassistant.Models.Product;
 import kz.alser.stepanov.semen.sellerassistant.Models.ProductResponse;
 import kz.alser.stepanov.semen.sellerassistant.R;
@@ -63,6 +64,8 @@ import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+
+import static kz.alser.stepanov.semen.sellerassistant.Helpers.Helpers.GetDefaultLanguageId;
 
 //endregion
 
@@ -185,6 +188,9 @@ public class MainActivity
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        int lId = GetDefaultLanguageId();
+
     }
 
     //region Key press events
@@ -270,22 +276,23 @@ public class MainActivity
     @Override
     public boolean onNavigationItemSelected (MenuItem item)
     {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera)
+        if (id == R.id.nav_orders)
         {
-            // Handle the camera action
+            Intent orders = new Intent();
+            orders.setClass(this, OrdersActivity.class);
+            startActivity(orders);
         }
-        else if (id == R.id.nav_gallery)
-        {
-
-        }
-        else if (id == R.id.nav_slideshow)
+        else if (id == R.id.nav_clients)
         {
 
         }
-        else if (id == R.id.nav_manage)
+        else if (id == R.id.nav_sellers)
+        {
+
+        }
+        else if (id == R.id.nav_settings)
         {
             Intent settings = new Intent();
             settings.setClass(this, SettingsActivity.class);
@@ -669,7 +676,7 @@ public class MainActivity
 
                         if (r.getRspCode() != 0)
                         {
-                            Toast.makeText(MainActivity.this, String.format("Возникла ошибка при обновлении категорий: %s", r.getRspMessage()), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, String.format(getString(R.string.error_message_update_categories), r.getRspMessage()), Toast.LENGTH_SHORT).show();
                             return;
                         }
 
@@ -688,7 +695,7 @@ public class MainActivity
 
                     }, throwable -> {
                         swipeContainer.setRefreshing(false);
-                        Toast.makeText(MainActivity.this, String.format("Возникла ошибка при обновлении категорий: %s", throwable.getMessage()), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, String.format(getString(R.string.error_message_update_categories), throwable.getMessage()), Toast.LENGTH_SHORT).show();
                         throwable.printStackTrace();
                     },
                     () -> swipeContainer.setRefreshing(false));
@@ -696,7 +703,7 @@ public class MainActivity
         catch (Exception ex)
         {
             swipeContainer.setRefreshing(false);
-            Toast.makeText(MainActivity.this, String.format("Возникла ошибка при обновлении категорий: %s", ex.getMessage()), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, String.format(getString(R.string.error_message_update_categories), ex.getMessage()), Toast.LENGTH_SHORT).show();
             ex.printStackTrace();
         }
     }

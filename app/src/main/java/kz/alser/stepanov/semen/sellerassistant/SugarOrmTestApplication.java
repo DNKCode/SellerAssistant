@@ -4,6 +4,7 @@ import android.content.res.Configuration;
 import com.orm.SugarApp;
 import com.orm.SugarContext;
 
+import kz.alser.stepanov.semen.sellerassistant.Helpers.ApplicationContextSingleton;
 import kz.alser.stepanov.semen.sellerassistant.Models.Cart;
 import kz.alser.stepanov.semen.sellerassistant.Models.Category;
 import kz.alser.stepanov.semen.sellerassistant.Models.Language;
@@ -33,6 +34,8 @@ public class SugarOrmTestApplication extends SugarApp
         Orders.findById(Orders.class, (long) 1);
         OrdersProduct.findById(OrdersProduct.class, (long) 1);
         OrdersStatus.findById(OrdersStatus.class, (long) 1);
+
+        ApplicationContextSingleton.getInstance().initialize(this);
     }
 
     @Override

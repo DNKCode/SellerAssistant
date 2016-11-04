@@ -75,14 +75,16 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_seller_sex"
+                    android:text="@string/settings_language"
                     android:paddingRight="20dp"/>
 
-                <Spinner
-                    android:id="@+id/userSex"
-                    android:spinnerMode="dropdown"
+                <android.support.v7.widget.AppCompatSpinner
+                    android:id="@+id/settings_language"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:spinnerMode="dropdown"
+                    android:layout_height="wrap_content">
+
+                </android.support.v7.widget.AppCompatSpinner>
 
             </LinearLayout>
 
