@@ -6,14 +6,4 @@
           android:icon="@drawable/ic_search_white_48dp"
           app:showAsAction="ifRoom"
           android:title="Done"/>
-
-    <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/menu_load"
-        android:title="Load" />
 </menu>

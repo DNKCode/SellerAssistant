@@ -115,7 +115,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                     {
                         Resources res = holder.cv.getContext().getResources();
                         String urlImg = String.format("%s/%s/%s", res.getString(R.string.base_url), res.getString(R.string.image_url), imagePath);
-                        Picasso.with(holder.cv.getContext()).load(urlImg).resize(200, 200).into(holder.itemPhoto);
+                        Picasso.with(holder.cv.getContext()).load(urlImg).resize(0, 200).into(holder.itemPhoto);
                     }
                 }
                 catch (Exception ex)

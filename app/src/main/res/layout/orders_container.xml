@@ -48,6 +48,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:textAlignment="gravity"
+            android:layout_below="@+id/order_invoice_number"
             />
 
         <LinearLayout

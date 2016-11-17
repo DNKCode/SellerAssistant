@@ -2,6 +2,7 @@
     <string name="app_name">Seller Assistant</string>
     <string name="base_url">http://ustyle.kz</string>
     <string name="image_url">image</string>
+    <string name="image_flags_url">flags</string>
     <string name="default_language_id_pref">DEFAULT_LANGUAGE</string>
     <string name="default_language_id">1</string>
 

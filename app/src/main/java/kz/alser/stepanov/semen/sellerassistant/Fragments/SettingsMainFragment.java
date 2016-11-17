@@ -11,23 +11,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import kz.alser.stepanov.semen.sellerassistant.Activities.OrdersActivity;
 import kz.alser.stepanov.semen.sellerassistant.Adapters.SpinnerLanguageAdapter;
 import kz.alser.stepanov.semen.sellerassistant.Models.Language;
 import kz.alser.stepanov.semen.sellerassistant.Models.Orders;
 import kz.alser.stepanov.semen.sellerassistant.R;
+import ru.tinkoff.decoro.MaskImpl;
+import ru.tinkoff.decoro.slots.PredefinedSlots;
+import ru.tinkoff.decoro.watchers.FormatWatcher;
+import ru.tinkoff.decoro.watchers.MaskFormatWatcher;
 import rx.Observable;
 import rx.Subscription;
 
-public class SettingsMainFragment
-        extends Fragment
+public class SettingsMainFragment extends Fragment
 {
     private OnFragmentInteractionListener mListener;
     private ProgressDialog pd;
@@ -51,8 +51,8 @@ public class SettingsMainFragment
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
         AppCompatSpinner spinner = (AppCompatSpinner) view.findViewById(R.id.settings_language);
-        spinnerAdapter = new SpinnerLanguageAdapter(getActivity(), android.R.layout.simple_spinner_item, GetLanguages());
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerAdapter = new SpinnerLanguageAdapter(getActivity(), android.R.layout.simple_dropdown_item_1line , GetLanguages());
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         spinner.setAdapter(spinnerAdapter);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -69,6 +69,13 @@ public class SettingsMainFragment
 
             }
         } );
+
+        TextView phoneNumber = (TextView) view.findViewById(R.id.phoneNumberInSettings);
+
+        FormatWatcher formatWatcher = new MaskFormatWatcher(
+                MaskImpl.createTerminated(PredefinedSlots.RUS_PHONE_NUMBER)
+        );
+        formatWatcher.installOn(phoneNumber);
 
         return view;
     }

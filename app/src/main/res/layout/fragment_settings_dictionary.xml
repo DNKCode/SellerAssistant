@@ -1,121 +1,129 @@
-<GridLayout
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView
+    android:id="@+id/login_form"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:rowCount="6"
-    android:columnCount="2"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:elevation="2dp"
-    tools:elevation="1dp"
-    android:alignmentMode="alignBounds">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <TextView android:text="Категории"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_column="0"
-              android:layout_row="0"
-              android:layout_margin="8dp"
-              android:padding="16dp"/>
+    <GridLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:rowCount="6"
+        android:columnCount="2"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:elevation="2dp"
+        tools:elevation="1dp"
+        android:alignmentMode="alignBounds">
 
-    <Button
-        android:id="@+id/btnUpdateCategories"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Обновить"
-        android:layout_column="1"
-        android:layout_row="0"
-        android:padding="16dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="right|center_vertical"/>
+        <TextView android:text="Категории"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_column="0"
+                  android:layout_row="0"
+                  android:layout_margin="8dp"
+                  android:padding="16dp"/>
 
-
-    <TextView android:text="Товары"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_column="0"
-              android:layout_row="1"
-              android:layout_margin="8dp"
-              android:padding="16dp"/>
-
-    <Button
-        android:id="@+id/btnUpdateProducts"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Обновить"
-        android:layout_column="1"
-        android:layout_row="1"
-        android:padding="16dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="right|center_vertical"/>
-
-    <TextView android:text="Заказы"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_column="0"
-              android:layout_row="2"
-              android:layout_margin="8dp"
-              android:padding="16dp"/>
-
-    <Button
-        android:id="@+id/btnUpdateOrders"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Обновить"
-        android:layout_column="1"
-        android:layout_row="2"
-        android:padding="16dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="right|center_vertical"/>
+        <Button
+            android:id="@+id/btnUpdateCategories"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Обновить"
+            android:layout_column="1"
+            android:layout_row="0"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:layout_gravity="right|center_vertical"/>
 
 
-    <TextView android:text="Клиенты"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_column="0"
-              android:layout_row="3"
-              android:layout_margin="8dp"
-              android:padding="16dp"/>
+        <TextView android:text="Товары"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_column="0"
+                  android:layout_row="1"
+                  android:layout_margin="8dp"
+                  android:padding="16dp"/>
 
-    <Button
-        android:id="@+id/btnUpdateClients"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Обновить"
-        android:layout_column="1"
-        android:layout_row="3"
-        android:padding="16dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="right|center_vertical"/>
+        <Button
+            android:id="@+id/btnUpdateProducts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Обновить"
+            android:layout_column="1"
+            android:layout_row="1"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:layout_gravity="right|center_vertical"/>
 
-    <TextView android:text="Языковые настройки"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_column="0"
-              android:layout_row="4"
-              android:layout_margin="8dp"
-              android:padding="16dp"/>
+        <TextView android:text="Заказы"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_column="0"
+                  android:layout_row="2"
+                  android:layout_margin="8dp"
+                  android:padding="16dp"/>
 
-    <Button
-        android:id="@+id/btnUpdateLanguages"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Обновить"
-        android:layout_column="1"
-        android:layout_row="4"
-        android:padding="16dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="right|center_vertical"/>
+        <Button
+            android:id="@+id/btnUpdateOrders"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Обновить"
+            android:layout_column="1"
+            android:layout_row="2"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:layout_gravity="right|center_vertical"/>
 
-    <Button
-        android:id="@+id/btnUpdateAll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Обновить все"
-        android:layout_row="5"
-        android:layout_columnSpan="2"
-        android:layout_margin="8dp"
-        android:padding="16dp"
-        android:layout_gravity="center_vertical|center_horizontal|center"
-        android:elevation="2dp"/>
 
-</GridLayout>
+        <TextView android:text="Клиенты"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_column="0"
+                  android:layout_row="3"
+                  android:layout_margin="8dp"
+                  android:padding="16dp"/>
+
+        <Button
+            android:id="@+id/btnUpdateClients"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Обновить"
+            android:layout_column="1"
+            android:layout_row="3"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:layout_gravity="right|center_vertical"/>
+
+        <TextView android:text="Языковые настройки"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_column="0"
+                  android:layout_row="4"
+                  android:layout_margin="8dp"
+                  android:padding="16dp"/>
+
+        <Button
+            android:id="@+id/btnUpdateLanguages"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Обновить"
+            android:layout_column="1"
+            android:layout_row="4"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:layout_gravity="right|center_vertical"/>
+
+        <Button
+            android:id="@+id/btnUpdateAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Обновить все"
+            android:layout_row="5"
+            android:layout_columnSpan="2"
+            android:layout_margin="8dp"
+            android:padding="16dp"
+            android:layout_gravity="center_vertical|center_horizontal|center"
+            android:elevation="2dp"/>
+
+    </GridLayout>
+
+</ScrollView>
