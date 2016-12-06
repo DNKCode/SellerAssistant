@@ -181,6 +181,8 @@ public class MainActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.getMenu().performIdentifierAction(R.id.nav_home, 0);
+        navigationView.setCheckedItem(R.id.nav_home);
 
         cartTotalText = (TextView) findViewById(R.id.cartTotal);
         initCart(GetCartItems());
@@ -198,10 +200,10 @@ public class MainActivity
     @Override
     public void onBackPressed ()
     {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START))
+        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (mDrawer.isDrawerOpen(GravityCompat.START))
         {
-            drawer.closeDrawer(GravityCompat.START);
+            mDrawer.closeDrawer(GravityCompat.START);
         }
         else
         {

@@ -79,6 +79,7 @@ public class OrdersActivity extends AppCompatActivity
         switch (item.getItemId())
         {
             case android.R.id.home:
+                item.setChecked(false);
                 onBackPressed();
                 return true;
         }
